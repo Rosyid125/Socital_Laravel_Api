@@ -18,20 +18,23 @@ class PostController extends Controller
     public function getallposts(Request $request)
     {
         try {
-            $validatedData = $request->validate([
-                'userid' => 'required',
-            ]);
-    
-            $userid = $validatedData['userid'];
+            $userid = $request->userid;
+            
             $userid12 = Friend::select('userid1', 'userid2')
             ->where('userid1', $userid)
             ->orWhere('userid2', $userid)
             ->get();
+
+            if ($userid12->isEmpty()) {
+                $posts = Post::where('userid', $userid)->get();
+                return response()->json(["posts" => $posts], 200);                
+            } else {
+                $posts = Post::where(function ($query) use ($userid12) {
+                    $query->whereIn('userid', $userid12->pluck('userid1'))
+                          ->orWhereIn('userid', $userid12->pluck('userid2'));
+                })->get();
+            }
             
-            $posts = Post::where(function ($query) use ($userid12) {
-                $query->whereIn('userid', $userid12->pluck('userid1'))
-                      ->orWhereIn('userid', $userid12->pluck('userid2'));
-            })->get();
             return response()->json(["posts" => $posts], 200);
 
         } catch (ValidationException $e) {
@@ -58,16 +61,12 @@ class PostController extends Controller
             ], 500);
         }
     }
-    public function addapost(Request $request)
+    public function createpost(Request $request)
     {
         try {
             $validatedData = $request->validate([
                 'userid' => 'required',
             ]);
-
-            do {
-                $postid = Str::random(10);
-            } while (Post::where('postid', $postid)->exists()); //ini saya buat random supaya bisa diambil, nah kalau userid tidak perlu ini karena ada data yang unique, yaitu email, jadi bisa diambil dari situ ketika query, sedangkan ini tidak bisa (perulangan untuk menghindari duplikasi).
     
             $userid = $validatedData['userid'];
             $post = $request->input('post');
@@ -75,10 +74,14 @@ class PostController extends Controller
 
             $create = Post::create([
                 'userid' => $userid,
+                'datetime' => date("Y-m-d H:i:s"),
                 'post' => $post,
                 'postpic'=> $postpic,
-                'postid' => $postid,
+                'likes' => 0,
+                'comments' => 0
             ]);
+
+            $postid = Post::select('postid') -> get();
 
             if (!$create) {
                 return response()->json(['messsage' => 'Can\'t create post'], 400);
@@ -92,7 +95,7 @@ class PostController extends Controller
         } catch (ValidationException $e) {
             return response()->json(['message' => $e->errors()], 422);
         } catch (\Exception $e) {
-            dd($e);
+            // dd($e);
             return response()->json([
                 'status' => false,
                 'message' => 'Internal server error.'

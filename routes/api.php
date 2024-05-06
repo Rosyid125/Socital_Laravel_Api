@@ -28,9 +28,9 @@ Route::middleware('auth:sanctum')->group(function(){
 });
 
 //btw ini belum terproteksi untuk testing
-Route::get('/posts', [PostController::class, 'getallposts']); //edited
-Route::get('/{userid}/posts', [PostController::class, 'getalluserposts']); //edited
-Route::post('/post/create', [PostController::class, 'createpost']); //edited
+Route::get('/{userid}/allposts', [PostController::class, 'getallposts']); 
+Route::get('/{userid}/alluserposts', [PostController::class, 'getalluserposts']); 
+Route::post('/post/create', [PostController::class, 'createpost']); 
 Route::get('/post/{postid}', [PostController::class, 'postdetails']); //belum dikerjakan
-Route::post('/post/{postid}/edit', [PostController::class, 'editapost']); //edited
-Route::delete('/post/{postid}/delete', [PostController::class, 'deleteapost']); //edited
+Route::post('/post/{postid}/edit', [PostController::class, 'editapost']); 
+Route::delete('/post/{postid}/delete', [PostController::class, 'deleteapost']); 
