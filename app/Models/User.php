@@ -16,7 +16,7 @@ class User extends Authenticatable //nah ini contoh klo nama class singlular den
     protected $primaryKey = "userid";
 
     protected $fillable = [
-        'email', 'password', 'username'
+        'email', 'password', 'username', 'profilepicture', 'bio'
         //Tambahkan atribut lainnya yang ingin Anda izinkan untuk dimasukkan secara massal
     ];
 
