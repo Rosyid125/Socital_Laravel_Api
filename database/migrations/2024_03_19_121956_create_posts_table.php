@@ -15,8 +15,8 @@ return new class extends Migration
             $table->id('postid');
             $table->unsignedBigInteger('userid');
             $table->dateTime('datetime');
-            $table->string('post');
-            $table->string('postpic');
+            $table->string('post')->nullable(true);
+            $table->string('postpic')->nullable(true);
             $table->Integer('likes');
             $table->Integer('comments');
             $table->timestamps();
