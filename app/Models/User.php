@@ -24,8 +24,13 @@ class User extends Authenticatable //nah ini contoh klo nama class singlular den
     {
         return $this->hasMany(Post::class, 'userid');
     }
-    public function friend(): HasMany
+    public function follow(): HasMany
     {
-        return $this->hasMany(Friend::class, 'userid');
+        return $this->hasMany(Follow::class, 'userid');
+    }
+
+    public function like(): HasMany
+    {
+        return $this->hasMany(Like::class, 'userid');
     }
 }
