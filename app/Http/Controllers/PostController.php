@@ -86,14 +86,14 @@ class PostController extends Controller
                 'comments' => 0
             ]);
 
-            $newPostId = $create->postid;
+            $newpostid = $create->postid;
 
             if (!$create) {
                 return response()->json(['messsage' => 'Can\'t create post'], 400);
             } else {
                 return response()->json([
                     'messsage' => 'Post has been created',
-                    'postid' => $newPostId
+                    'postid' => $newpostid
                 ], 200);
             }
         } catch (ValidationException $e) {
@@ -170,7 +170,10 @@ class PostController extends Controller
             $postid = $request->postid;
             $userid = $validatedData['userid'];
 
-            $delete = Post::where('userid', $userid)->where('postid', $postid)->delete();
+            $delete = Post::where([
+                'postid' => $postid,
+                'userid' => $userid
+            ])->delete();
 
             if(!$delete){
                 return response()->json(['messsage' => 'Post is not existed or this is not your post'], 400);

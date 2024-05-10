@@ -18,7 +18,7 @@ class Post extends Model
     }
 
     protected $fillable = [
-        'postid', 'userid', 'datetime', 'post', 'postpic', 'likes', 'comments'
+        'userid', 'datetime', 'post', 'postpic', 'likes', 'comments'
         //Tambahkan atribut lainnya yang ingin Anda izinkan untuk dimasukkan secara massal
     ];
 }

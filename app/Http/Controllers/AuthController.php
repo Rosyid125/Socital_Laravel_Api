@@ -16,7 +16,7 @@ class AuthController extends Controller
     public function me(Request $request) {
         try {
             if (auth('sanctum')->user()) {
-                $tokens = auth('sanctum')->user()->tokens();
+                Auth::user()->currentAccessToken();
                 return response()->json([
                     'status' => true,
                     'message' => "You are indeed logged in."
@@ -56,12 +56,12 @@ class AuthController extends Controller
             }
 
             if (Auth::attempt(['email' => $email, 'password' => $password])) {
-                $auth = Auth::user(); //hanya untuk melihat user yang sekarang teroutentikasi
+                $userid = Auth::id();
                 $token = auth('sanctum')->user()->createToken('AuthToken')->plainTextToken;
                 return response()->json([
                     'status' => true,
                     'message' => 'Authentication successful.',
-                    'auth' => $auth,
+                    'userid' => $userid,
                     'token' => $token
                 ], 200);
             
@@ -119,24 +119,25 @@ class AuthController extends Controller
             $password = $validatedData['password'];
 
             $user = User::where('email', $email)->first();
+
             if($user){
-                return response()->json(['message' => 'Email telah digunakan'], 409);
+                return response()->json(['message' => 'Email telah digunakan'], 400);
             }
 
-            try {
-                User::create([
-                    'username' => $username,
-                    'email' => $email,
-                    'password' => Hash::make($password)
-                ]);
+            User::create([
+                'username' => $username,
+                'email' => $email,
+                'password' => Hash::make($password)
+            ]);
 
-                return response()->json(['message' => 'Data berhasil disimpan'], 201);
-
-            } catch (QueryException $e) {
-                return response()->json(['message' => 'Gagal menyimpan data: ' . $e->getMessage()], 500);
-            }
+            return response()->json(['message' => 'Data berhasil disimpan'], 200);
         }catch (ValidationException $e) {
             return response()->json(['message' => $e->errors()], 422);
+        }catch (\Exception $e) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Internal server error.'
+            ], 500);
         }
     }
 }

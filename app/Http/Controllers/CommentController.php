@@ -11,46 +11,46 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 
 use App\Models\Post;
-use App\Models\Like;
+use App\Models\Comment;
+use App\Models\User;
 
 
-class LikeController extends Controller
+class CommentController extends Controller
 {
 
-    public function likePost(Request $request){
+    public function addComment(Request $request){
         try {
             $validatedData = $request->validate([
-                "userid"=> "required"
+                "userid"=> "required",
+                "comment"=> "required"
             ]);
 
             $postid = $request->postid;
+            $datetime = date("Y-m-d H:i:s");
             $userid = $validatedData['userid'];
+            $comment = $validatedData['comment'];
 
-            $alreadyliked = Like::where(['userid' => $userid,
-            'postid' => $postid])
-            ->first();
-            
-            if($alreadyliked){
-                return response()->json(["messege" => "you already liked this post"], 400);
-            } else {
-                $like = Like::create([
-                    'userid' => $userid,
-                    'postid' => $postid
-                ]);
-            }
+            $createcomment = Comment::create([
+                'postid' => $postid,
+                'userid' => $userid,
+                'datetime' => $datetime,
+                'comment' => $comment
+            ]);
 
-            if(!$like){
+
+            if(!$createcomment){
                 return response()->json(['message' => 'Post is not existed'], 400);
             } else {
-                $incrementlike = Post::where('postid', $postid)
+                $incrementcomment = Post::where('postid', $postid)
                 ->where('userid', $userid)
-                ->increment('likes');
+                ->increment('comments');
 
-                $newlikeid = $like -> likeid;
+                $newcommentid = $createcomment->commentid;
     
                 return response()->json([
-                    "likeid" => $newlikeid, 
-                    "messege" => "post has been liked"], 200);
+                    "messege" => "you have commented on post",
+                    "commentid" => $newcommentid
+                ], 200);
             }
         } catch (ValidationException $e) {
             return response()->json(['message' => $e->errors()], 422);
@@ -62,34 +62,25 @@ class LikeController extends Controller
             ], 500);
         }
     }
-    public function dislikePost(Request $request){
+    public function deleteComment(Request $request){
         try {
             $validatedData = $request->validate([
                 "userid"=> "required",
             ]);
 
-            $userid = $validatedData['userid'];
             $postid = $request->postid;
-            $likeid = $request->likeid;
+            $userid = $validatedData['userid'];
+            $commentid = $request->commentid;
 
-            $dislike = Like::where([
+            $deletecomment = Comment::where([
                 'userid' => $userid,
                 'postid' => $postid,
-                'likeid' => $likeid
-                ])->delete();
+                'commentid' => $commentid
+            ])
+            ->delete();
 
-            if(!$dislike){
-                return response()->json(['message' => 'Post is not existed or you\'re not liked this post'], 400);
-            } else {
-                $decrementlike = Post::where('postid', $postid)
-                ->where('userid', $userid)
-                ->decrement('likes');
-
-                return response()->json(["messege" => "post has been disliked"], 200);
-            }
-        } catch (ValidationException $e) {
-            return response()->json(['message' => $e->errors()], 422);
-        } catch (\Exception $e) {
+            return response()->json(["message" => "comment has been deleted"], 200);
+        }catch (\Exception $e) {
             dd($e);
             return response()->json([
                 'status' => false,
@@ -97,18 +88,21 @@ class LikeController extends Controller
             ], 500);
         }
     }
-    public function getLikes(Request $request){
+    public function getComments(Request $request){
         try {
+
             $postid = $request->postid;
 
-            $likedby = Like::with(['user' => function ($query) {
+            $comments = Comment::with(['user' => function ($query) {
                 $query->select('userid','username', 'profilepicture');
             }])
             ->where('postid', $postid)
-            ->select('userid')
+            ->select('commentid', 'userid', 'datetime', 'comment')
             ->get();
 
-            return response()->json(["likedby" => $likedby], 200);
+            return response()->json(["comments" => $comments], 200);
+        } catch (ValidationException $e) {
+            return response()->json(['message' => $e->errors()], 422);
         } catch (\Exception $e) {
             dd($e);
             return response()->json([
