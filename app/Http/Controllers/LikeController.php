@@ -19,12 +19,8 @@ class LikeController extends Controller
 
     public function likePost(Request $request){
         try {
-            $validatedData = $request->validate([
-                "userid"=> "required"
-            ]);
-
-            $postid = $request->postid;
-            $userid = $validatedData['userid'];
+            $postid = $request->route('postid');
+            $userid = Auth::user()->userid;
 
             $alreadyliked = Like::where(['userid' => $userid,
             'postid' => $postid])
@@ -50,10 +46,9 @@ class LikeController extends Controller
     
                 return response()->json([
                     "likeid" => $newlikeid, 
-                    "messege" => "post has been liked"], 200);
+                    "messege" => "post has been liked"
+                ],200);
             }
-        } catch (ValidationException $e) {
-            return response()->json(['message' => $e->errors()], 422);
         } catch (\Exception $e) {
             dd($e);
             return response()->json([
@@ -64,22 +59,18 @@ class LikeController extends Controller
     }
     public function dislikePost(Request $request){
         try {
-            $validatedData = $request->validate([
-                "userid"=> "required",
-            ]);
-
-            $userid = $validatedData['userid'];
-            $postid = $request->postid;
-            $likeid = $request->likeid;
+            $userid = Auth::user()->userid;
+            $postid = $request->route('postid');
+            $likeid = $request->route('likeid');
 
             $dislike = Like::where([
                 'userid' => $userid,
                 'postid' => $postid,
                 'likeid' => $likeid
-                ])->delete();
+            ])->delete();
 
             if(!$dislike){
-                return response()->json(['message' => 'Post is not existed or you\'re not liked this post'], 400);
+                return response()->json(['message' => 'Post is not existed or you have\'nt liked this post'], 400);
             } else {
                 $decrementlike = Post::where('postid', $postid)
                 ->where('userid', $userid)
@@ -87,8 +78,6 @@ class LikeController extends Controller
 
                 return response()->json(["messege" => "post has been disliked"], 200);
             }
-        } catch (ValidationException $e) {
-            return response()->json(['message' => $e->errors()], 422);
         } catch (\Exception $e) {
             dd($e);
             return response()->json([
@@ -99,7 +88,7 @@ class LikeController extends Controller
     }
     public function getLikes(Request $request){
         try {
-            $postid = $request->postid;
+            $postid = $request->route('postid');
 
             $likedby = Like::with(['user' => function ($query) {
                 $query->select('userid','username', 'profilepicture');

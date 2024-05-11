@@ -18,7 +18,7 @@ class PostController extends Controller
     public function getAllPosts(Request $request)
     {
         try {
-            $userid = $request->userid;
+            $userid = $request->route('userid');
             
             $followed = Follow::select('followed')
             ->where('following', $userid)
@@ -35,8 +35,6 @@ class PostController extends Controller
             ->get();
 
             return response()->json(["posts" => $posts], 200);
-        } catch (ValidationException $e) {
-            return response()->json(['message' => $e->errors()], 422);
         } catch (\Exception $e) {
 
             dd($e);
@@ -51,7 +49,7 @@ class PostController extends Controller
     public function getAllUserPosts(Request $request)
     {
         try {
-            $userid = $request->userid;
+            $userid = $request->route('userid');
 
             $posts = Post::where('userid', $userid)
             ->select('postid', 'userid', 'datetime', 'post', 'postpic', 'likes', 'comments')
@@ -69,13 +67,13 @@ class PostController extends Controller
     public function createPost(Request $request)
     {
         try {
-            $validatedData = $request->validate([
-                'userid' => 'required'
-            ]);
-
-            $userid = $validatedData['userid'];
+            $userid = Auth::user()->userid;
             $post = $request->input('post');
-            $postpic = $request->input('postpic');            
+            $postpic = $request->input('postpic');
+
+            if (!$post && !$postpic) {
+                return response()->json(['messsage' => 'Post and Post Picture can\'t be empty'], 400);
+            }
 
             $create = Post::create([
                 'userid' => $userid,
@@ -96,8 +94,6 @@ class PostController extends Controller
                     'postid' => $newpostid
                 ], 200);
             }
-        } catch (ValidationException $e) {
-            return response()->json(['message' => $e->errors()], 422);
         } catch (\Exception $e) {
             return response()->json([
                 'status' => false,
@@ -108,7 +104,7 @@ class PostController extends Controller
     public function postDetails(Request $request)
     {
         try {
-            $postid = $request->postid;
+            $postid = $request->route('postid');
 
             $details = Post::with(['user' => function ($query) {
                 $query->select('userid','username', 'profilepicture');
@@ -128,14 +124,14 @@ class PostController extends Controller
     public function editPost(Request $request)
     {
         try {
-            $validatedData = $request->validate([
-                "userid"=> "required",
-            ]);
-
-            $postid = $request->postid;
-            $userid = $validatedData['userid'];
+            $postid = $request->route('postid');
+            $userid = Auth::user()->userid;
             $post = $request->input('post');
-            $postpic = $request->input('postpic');    
+            $postpic = $request->input('postpic');
+
+            if (!$post && !$postpic) {
+                return response()->json(['messsage' => 'Post and Post Picture can\'t be empty'], 400);
+            }
 
             $update = Post::where('postid', $postid)
             ->where('userid', $userid)
@@ -150,9 +146,6 @@ class PostController extends Controller
             } else {
                 return response()->json(['messsage' => 'Post has been updated'], 200);
             }
-
-        } catch (ValidationException $e) {
-            return response()->json(['message' => $e->errors()], 422);
         } catch (\Exception $e) {
             return response()->json([
                 'status' => false,
@@ -163,12 +156,8 @@ class PostController extends Controller
     public function deletePost(Request $request)
     {
         try {
-            $validatedData = $request->validate([
-                "userid"=> "required",
-            ]);
-
-            $postid = $request->postid;
-            $userid = $validatedData['userid'];
+            $postid = $request->route('postid');
+            $userid = Auth::user()->userid;
 
             $delete = Post::where([
                 'postid' => $postid,
@@ -180,9 +169,6 @@ class PostController extends Controller
             } else {
                 return response()->json(["messege" => "your post has been deleted"], 200);
             }
-
-        } catch (ValidationException $e) {
-            return response()->json(['message' => $e->errors()], 422);
         } catch (\Exception $e) {
             return response()->json([
                 'status' => false,

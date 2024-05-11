@@ -6,6 +6,8 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\LikeController;
 use App\Http\Controllers\CommentController;
+use App\Http\Controllers\FollowController;
+use App\Http\Controllers\UserController;
 use App\Http\Middleware\Authenticate;
 /*
 |--------------------------------------------------------------------------
@@ -22,24 +24,62 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-Route::post('/login', [AuthController::class, 'login']);
-Route::post('/register', [AuthController::class, 'register']);
-Route::middleware('auth:sanctum')->group(function(){
-    Route::delete('/logout', [AuthController::class, 'logout']);
-    Route::get('/me', [AuthController::class, 'me']);
+//auth 
+Route::post('/auth/login', [AuthController::class, 'login']);
+Route::post('/auth/register', [AuthController::class, 'register']);
+//users
+
+Route::prefix('/users')->group(function(){
+    Route::get('/', [userController::class, 'getAllUsers']);
+    Route::get('/search', [userController::class, 'searchUser']);
+    Route::prefix('/{userid}')->group(function(){
+        Route::get('/', [userController::class, 'userDetails']);
+        //users: posts
+        Route::get('/allposts', [PostController::class, 'getAllPosts']);
+        Route::get('/posts', [PostController::class, 'getAllUserPosts']);
+    });
+});
+Route::prefix('/posts/{postid}')->group(function(){
+    //posts
+    Route::get('/', [PostController::class, 'postDetails']);
+    //posts: likes
+    Route::get('/likes', [LikeController::class, 'getLikes']);
+    //posts: comments
+    Route::get('/comments', [CommentController::class, 'getComments']);
+});
+ //follows
+Route::prefix('/follows/{userid}')->group(function(){
+    Route::get('/followers', [FollowController::class, 'getFollowers']);
+    Route::get('/followings', [FollowController::class, 'getFollowing']);
 });
 
-//btw ini belum terproteksi untuk testing
-Route::get('/{userid}/allposts', [PostController::class, 'getAllPosts']); 
-Route::get('/{userid}/alluserposts', [PostController::class, 'getAllUserPosts']); 
-Route::post('/post/create', [PostController::class, 'createPost']); 
-Route::get('/post/{postid}', [PostController::class, 'postDetails']);
-Route::post('/post/{postid}/edit', [PostController::class, 'editPost']); 
-Route::delete('/post/{postid}/delete', [PostController::class, 'deletePost']); 
-Route::post('/post/{postid}/like/like', [LikeController::class, 'likePost']); 
-Route::delete('/post/{postid}/like/{likeid}/dislike', [LikeController::class, 'dislikePost']); 
-Route::get('/post/{postid}/like/alllikes', [LikeController::class, 'getLikes']); 
-Route::post('/post/{postid}/comment/add', [CommentController::class, 'addComment']); 
-Route::delete('/post/{postid}/comment/{commentid}/delete', [CommentController::class, 'deleteComment']); 
-Route::get('/post/{postid}/comment/allcomments', [CommentController::class, 'getComments']); 
-
+Route::middleware('auth:sanctum')->group(function(){
+    //auth
+    Route::delete('/auth/logout', [AuthController::class, 'logout']);
+    Route::get('/auth/me', [AuthController::class, 'me']);
+    //users
+    Route::patch('/users/{userid}', [userController::class, 'editUser']);
+    //posts
+    Route::prefix('/posts')->group(function(){
+        Route::post('/create', [PostController::class, 'createPost']);
+        Route::prefix('/{postid}')->group(function(){
+            Route::patch('/edit', [PostController::class, 'editPost']);
+            Route::delete('/delete', [PostController::class, 'deletePost']);
+            //posts: likes
+            Route::prefix('/likes')->group(function(){
+                Route::post('/like', [LikeController::class, 'likePost']);
+                Route::delete('/{likeid}', [LikeController::class, 'dislikePost']);
+            });
+            //posts: comments
+            Route::prefix('/comments')->group(function(){
+                Route::post('/add', [CommentController::class, 'addComment']);
+                Route::delete('/{commentid}', [CommentController::class, 'deleteComment']);
+            });
+        });
+    });
+    //follows
+    Route::prefix('/follows')->group(function(){
+        Route::post('/{userid}', [FollowController::class, 'follow']);
+        Route::delete('/{followid}', [FollowController::class, 'unfollow']);
+    });
+});

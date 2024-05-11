@@ -21,13 +21,12 @@ class CommentController extends Controller
     public function addComment(Request $request){
         try {
             $validatedData = $request->validate([
-                "userid"=> "required",
                 "comment"=> "required"
             ]);
 
-            $postid = $request->postid;
+            $postid = $request->route('postid');
             $datetime = date("Y-m-d H:i:s");
-            $userid = $validatedData['userid'];
+            $userid = Auth::user()->userid;
             $comment = $validatedData['comment'];
 
             $createcomment = Comment::create([
@@ -64,13 +63,9 @@ class CommentController extends Controller
     }
     public function deleteComment(Request $request){
         try {
-            $validatedData = $request->validate([
-                "userid"=> "required",
-            ]);
-
-            $postid = $request->postid;
-            $userid = $validatedData['userid'];
-            $commentid = $request->commentid;
+            $postid = $request->route('postid');
+            $userid = Auth::user()->userid;
+            $commentid = $request->route('commentid');
 
             $deletecomment = Comment::where([
                 'userid' => $userid,
@@ -90,8 +85,7 @@ class CommentController extends Controller
     }
     public function getComments(Request $request){
         try {
-
-            $postid = $request->postid;
+            $postid = $request->route('postid');
 
             $comments = Comment::with(['user' => function ($query) {
                 $query->select('userid','username', 'profilepicture');
@@ -101,8 +95,6 @@ class CommentController extends Controller
             ->get();
 
             return response()->json(["comments" => $comments], 200);
-        } catch (ValidationException $e) {
-            return response()->json(['message' => $e->errors()], 422);
         } catch (\Exception $e) {
             dd($e);
             return response()->json([
