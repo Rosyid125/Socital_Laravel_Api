@@ -34,11 +34,13 @@ class PostController extends Controller
             ->select('postid', 'userid', 'datetime', 'post', 'postpic', 'likes', 'comments')
             ->get();
 
-            return response()->json(["posts" => $posts], 200);
+            return response()->json([
+                'status' => true,
+                'message' => 'All posts.',
+                'posts' => $posts
+            ], 200);
         } catch (\Exception $e) {
-
             dd($e);
-            
             return response()->json([
                 'status' => false,
                 'message' => 'Internal server error.'
@@ -55,8 +57,12 @@ class PostController extends Controller
             ->select('postid', 'userid', 'datetime', 'post', 'postpic', 'likes', 'comments')
             ->get();
 
-            return response()->json(["posts" => $posts], 200);
+            return response()->json([
+                'status' => true,
+                'message' => 'All user posts.',
+                'posts' => $posts], 200);
         } catch (\Exception $e) {
+            dd($e);
             return response()->json([
                 'status' => false,
                 'message' => 'Internal server error.'
@@ -72,12 +78,14 @@ class PostController extends Controller
             $postpic = $request->input('postpic');
 
             if (!$post && !$postpic) {
-                return response()->json(['messsage' => 'Post and Post Picture can\'t be empty'], 400);
+                return response()->json([
+                    'status' => false,
+                    'messsage' => 'Post and/or Post Picture can\'t be empty.'], 400);
             }
 
             $create = Post::create([
                 'userid' => $userid,
-                'datetime' => date("Y-m-d H:i:s"),
+                'datetime' => date('Y-m-d H:i:s'),
                 'post' => $post,
                 'postpic'=> $postpic,
                 'likes' => 0,
@@ -87,14 +95,19 @@ class PostController extends Controller
             $newpostid = $create->postid;
 
             if (!$create) {
-                return response()->json(['messsage' => 'Can\'t create post'], 400);
-            } else {
                 return response()->json([
-                    'messsage' => 'Post has been created',
-                    'postid' => $newpostid
-                ], 200);
+                    'status' => false,
+                    'messsage' => 'Can\'t create post.'
+                ], 400);
             }
+
+            return response()->json([
+                'status' => true,
+                'messsage' => 'Post has been created',
+                'postid' => $newpostid
+            ], 200);
         } catch (\Exception $e) {
+            dd($e);
             return response()->json([
                 'status' => false,
                 'message' => 'Internal server error.'
@@ -113,8 +126,13 @@ class PostController extends Controller
             ->select('postid', 'userid', 'datetime', 'post', 'postpic', 'likes', 'comments')
             ->get();
 
-            return response()->json(["details" => $details], 200);
+            return response()->json([
+                'status' => true,
+                'message' => 'Post details.',
+                'details' => $details
+            ], 200);
         } catch (\Exception $e) {
+            dd($e);
             return response()->json([
                 'status' => false,
                 'message' => 'Internal server error.'
@@ -130,23 +148,31 @@ class PostController extends Controller
             $postpic = $request->input('postpic');
 
             if (!$post && !$postpic) {
-                return response()->json(['messsage' => 'Post and Post Picture can\'t be empty'], 400);
+                return response()->json([
+                    'status' => false,
+                    'messsage' => 'Post and/or Post Picture can\'t be empty.'], 400);
             }
 
             $update = Post::where('postid', $postid)
             ->where('userid', $userid)
             ->update([
-                'datetime' => date("Y-m-d H:i:s"),
+                'datetime' => date('Y-m-d H:i:s'),
                 'post' => $post,
                 'postpic' => $postpic,
             ]);
 
             if (!$update) {
-                return response()->json(['messsage' => 'Post is not existed or this is not your post'], 400);
-            } else {
-                return response()->json(['messsage' => 'Post has been updated'], 200);
+                return response()->json([
+                    'status' => false,
+                    'messsage' => 'Post is not existed or this is not your post.'], 400);
             }
+
+            return response()->json([
+                'status' => true,
+                'messsage' => 'Post has been updated.'
+            ], 200);
         } catch (\Exception $e) {
+            dd($e);
             return response()->json([
                 'status' => false,
                 'message' => 'Internal server error.'
@@ -165,11 +191,17 @@ class PostController extends Controller
             ])->delete();
 
             if(!$delete){
-                return response()->json(['messsage' => 'Post is not existed or this is not your post'], 400);
-            } else {
-                return response()->json(["messege" => "your post has been deleted"], 200);
+                return response()->json([
+                    'status' => false,
+                    'messsage' => 'Post is not existed or this is not your post.'], 400);
             }
+
+            return response()->json([
+                'status' => true,
+                'messege' => 'your post has been deleted'
+            ], 200);
         } catch (\Exception $e) {
+            dd($e);
             return response()->json([
                 'status' => false,
                 'message' => 'Internal server error.'

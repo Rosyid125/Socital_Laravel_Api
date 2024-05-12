@@ -10,8 +10,8 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 
-use App\Models\Post;
 use App\Models\Like;
+use App\Models\Post;
 
 
 class LikeController extends Controller
@@ -27,28 +27,35 @@ class LikeController extends Controller
             ->first();
             
             if($alreadyliked){
-                return response()->json(["messege" => "you already liked this post"], 400);
-            } else {
-                $like = Like::create([
-                    'userid' => $userid,
-                    'postid' => $postid
-                ]);
+                return response()->json([
+                    'status' => false,
+                    'messege' => 'You already liked this post.'
+                ], 400);
             }
+
+            $like = Like::create([
+                'userid' => $userid,
+                'postid' => $postid
+            ]);
 
             if(!$like){
-                return response()->json(['message' => 'Post is not existed'], 400);
-            } else {
-                $incrementlike = Post::where('postid', $postid)
-                ->where('userid', $userid)
-                ->increment('likes');
-
-                $newlikeid = $like -> likeid;
-    
                 return response()->json([
-                    "likeid" => $newlikeid, 
-                    "messege" => "post has been liked"
-                ],200);
+                    'status' => false,
+                    'message' => 'Post is not existed.'
+                ], 400);
             }
+
+            $incrementlikes = Post::where('postid', $postid)
+            ->where('userid', $userid)
+            ->increment('likes');
+
+            $newlikeid = $like -> likeid;
+
+            return response()->json([
+                'status' => true,
+                'messege' => 'Post has been liked.',
+                'likeid' => $newlikeid
+            ], 200);
         } catch (\Exception $e) {
             dd($e);
             return response()->json([
@@ -70,14 +77,20 @@ class LikeController extends Controller
             ])->delete();
 
             if(!$dislike){
-                return response()->json(['message' => 'Post is not existed or you have\'nt liked this post'], 400);
-            } else {
-                $decrementlike = Post::where('postid', $postid)
-                ->where('userid', $userid)
-                ->decrement('likes');
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Post is not existed or you have\'nt liked this post.'
+                ], 400);
+            } 
 
-                return response()->json(["messege" => "post has been disliked"], 200);
-            }
+            $decrementlikes = Post::where('postid', $postid)
+            ->where('userid', $userid)
+            ->decrement('likes');
+
+            return response()->json([
+                'status' => true,
+                'messege' => 'Post has been disliked.'
+            ], 200);
         } catch (\Exception $e) {
             dd($e);
             return response()->json([
@@ -97,7 +110,11 @@ class LikeController extends Controller
             ->select('userid')
             ->get();
 
-            return response()->json(["likedby" => $likedby], 200);
+            return response()->json([
+                'status' => true,
+                'message' => 'Get likes success',
+                'likedby' => $likedby
+            ], 200);
         } catch (\Exception $e) {
             dd($e);
             return response()->json([

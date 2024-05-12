@@ -15,19 +15,23 @@ class AuthController extends Controller
 {
     public function me(Request $request) {
         try {
-            if (auth('sanctum')->user()) {
-                Auth::user()->currentAccessToken();
-                return response()->json([
-                    'status' => true,
-                    'message' => "You are indeed logged in."
-                ], 200);
-            } else {
+            $user = Auth::user();
+            if (!$user) {
                 return response()->json([
                     'status' => false,
                     'message' => 'User not found.'
                 ], 404);
             }
+
+            $userid = Auth::user()->userid;
+
+            return response()->json([
+                'status' => true,
+                'message' => 'You are indeed logged in.',
+                'userid' => $userid
+            ], 200);
         } catch (\Exception $e) {
+            dd($e);
             return response()->json([
                 'status' => false,
                 'message' => 'Internal server error.'
@@ -48,33 +52,38 @@ class AuthController extends Controller
 
             $user = User::where('email', $email)->first();
 
-            if (!$user) {
+            if(!$user) {
                 return response()->json([
                     'status' => false,
                     'message' => 'User not found.'
                 ], 404);
             }
 
-            if (Auth::attempt(['email' => $email, 'password' => $password])) {
-                $userid = Auth::id();
-                $token = auth('sanctum')->user()->createToken('AuthToken')->plainTextToken;
-                return response()->json([
-                    'status' => true,
-                    'message' => 'Authentication successful.',
-                    'userid' => $userid,
-                    'token' => $token
-                ], 200);
-            
-            } else {
+            $authattempt = Auth::attempt(['email' => $email, 'password' => $password]);
+
+            if(!$authattempt) {
                 return response()->json([
                     'status' => false,
                     'message' => 'Incorrect password.'
                 ], 401);
             }
 
+            $userid = Auth::id();
+            $token = auth('sanctum')->user()->createToken('AuthToken')->plainTextToken;
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Authentication successful.',
+                'userid' => $userid,
+                'token' => $token
+            ], 200);
         } catch (ValidationException $e) {
-            return response()->json(['message' => $e->errors()], 422);
+            return response()->json([
+                'status' => false, 
+                'message' => $e->errors()
+            ], 422);
         } catch (\Exception $e) {
+            dd($e);
             return response()->json([
                 'status' => false,
                 'message' => 'Internal server error.'
@@ -85,18 +94,22 @@ class AuthController extends Controller
     public function logout(Request $request)
     {
         try {
-            if (auth('sanctum')->user()) {
-                auth('sanctum')->user()->tokens()->delete();
-                return response()->json([
-                    'message' => 'Logged out successfully.'
-                ], 200);
-            } else {
+            $user = Auth::user();
+            if (!$user) {
                 return response()->json([
                     'status' => false,
                     'message' => 'User not authenticated.'
                 ], 401);
             }
+
+            auth('sanctum')->user()->tokens()->delete();
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Logged out successfully.'
+            ], 200);
         } catch (\Exception $e) {
+            dd($e);
             return response()->json([
                 'status' => false,
                 'message' => 'Logout failed.'
@@ -121,7 +134,10 @@ class AuthController extends Controller
             $user = User::where('email', $email)->first();
 
             if($user){
-                return response()->json(['message' => 'Email telah digunakan'], 400);
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Email is used.'
+                ], 400);
             }
 
             User::create([
@@ -130,10 +146,17 @@ class AuthController extends Controller
                 'password' => Hash::make($password)
             ]);
 
-            return response()->json(['message' => 'Data berhasil disimpan'], 200);
+            return response()->json([
+                'status' => true,
+                'message' => 'Data saved succesully'
+            ], 200);
         }catch (ValidationException $e) {
-            return response()->json(['message' => $e->errors()], 422);
+            return response()->json([
+                'status' => false,
+                'message' => $e->errors()
+            ], 422);
         }catch (\Exception $e) {
+            dd($e);
             return response()->json([
                 'status' => false,
                 'message' => 'Internal server error.'

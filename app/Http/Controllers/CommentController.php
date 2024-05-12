@@ -10,10 +10,8 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 
-use App\Models\Post;
 use App\Models\Comment;
-use App\Models\User;
-
+use App\Models\Post;
 
 class CommentController extends Controller
 {
@@ -21,11 +19,11 @@ class CommentController extends Controller
     public function addComment(Request $request){
         try {
             $validatedData = $request->validate([
-                "comment"=> "required"
+                'comment'=> 'required'
             ]);
 
             $postid = $request->route('postid');
-            $datetime = date("Y-m-d H:i:s");
+            $datetime = date('Y-m-d H:i:s');
             $userid = Auth::user()->userid;
             $comment = $validatedData['comment'];
 
@@ -38,21 +36,28 @@ class CommentController extends Controller
 
 
             if(!$createcomment){
-                return response()->json(['message' => 'Post is not existed'], 400);
-            } else {
-                $incrementcomment = Post::where('postid', $postid)
-                ->where('userid', $userid)
-                ->increment('comments');
-
-                $newcommentid = $createcomment->commentid;
-    
                 return response()->json([
-                    "messege" => "you have commented on post",
-                    "commentid" => $newcommentid
-                ], 200);
+                    'status' => false,
+                    'message' => 'Failed to add comment.'
+                ], 400);
             }
+
+            $incrementcomments = Post::where('postid', $postid)
+            ->where('userid', $userid)
+            ->increment('comments');
+
+            $newcommentid = $createcomment->commentid;
+
+            return response()->json([
+                'status' => true,
+                'messege' => 'You commented on the post.',
+                'commentid' => $newcommentid
+            ], 200);
         } catch (ValidationException $e) {
-            return response()->json(['message' => $e->errors()], 422);
+            return response()->json([
+                'status' => false,
+                'message' => $e->errors()
+            ], 422);
         } catch (\Exception $e) {
             dd($e);
             return response()->json([
@@ -74,7 +79,21 @@ class CommentController extends Controller
             ])
             ->delete();
 
-            return response()->json(["message" => "comment has been deleted"], 200);
+            if(!$deletecomment){
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Failed to delete comment.'
+                ], 400);
+            }
+
+            $decrementcomments = Post::where('postid', $postid)
+            ->where('userid', $userid)
+            ->decrement('comments');
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Comment has been deleted.'
+            ], 200);
         }catch (\Exception $e) {
             dd($e);
             return response()->json([
@@ -94,7 +113,11 @@ class CommentController extends Controller
             ->select('commentid', 'userid', 'datetime', 'comment')
             ->get();
 
-            return response()->json(["comments" => $comments], 200);
+            return response()->json([
+                'status' => true,
+                'message' => 'Comments retrieved successfully.',
+                'comments' => $comments
+            ], 200);
         } catch (\Exception $e) {
             dd($e);
             return response()->json([

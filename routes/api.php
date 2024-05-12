@@ -28,7 +28,6 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 Route::post('/auth/login', [AuthController::class, 'login']);
 Route::post('/auth/register', [AuthController::class, 'register']);
 //users
-
 Route::prefix('/users')->group(function(){
     Route::get('/', [userController::class, 'getAllUsers']);
     Route::get('/search', [userController::class, 'searchUser']);
@@ -39,8 +38,8 @@ Route::prefix('/users')->group(function(){
         Route::get('/posts', [PostController::class, 'getAllUserPosts']);
     });
 });
+//posts
 Route::prefix('/posts/{postid}')->group(function(){
-    //posts
     Route::get('/', [PostController::class, 'postDetails']);
     //posts: likes
     Route::get('/likes', [LikeController::class, 'getLikes']);
@@ -53,6 +52,7 @@ Route::prefix('/follows/{userid}')->group(function(){
     Route::get('/followings', [FollowController::class, 'getFollowing']);
 });
 
+//protected routes
 Route::middleware('auth:sanctum')->group(function(){
     //auth
     Route::delete('/auth/logout', [AuthController::class, 'logout']);

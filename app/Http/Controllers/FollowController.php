@@ -10,8 +10,8 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 
-use App\Models\User;
 use App\Models\Follow;
+use App\Models\User;
 
 class FollowController extends Controller
 {
@@ -25,12 +25,24 @@ class FollowController extends Controller
                 'followed' => $followed
             ]);
 
+            if(!$follow){
+                return response()->json([
+                    'status' => false,
+                    'messege' => 'Follow failed.'
+                ]);
+            }
+
             $newfollowid = $follow->followid;
 
+            $incrementfollowers = User::where('userid', $followed)
+            ->increment('followers');
+            $incrementfollowings = User::where('userid', $following)
+            ->increment('following');
+
             return response()->json([
-                "status" => true,
-                "messege" => "follow successfully",
-                "followid" => $newfollowid
+                'status' => true,
+                'messege' => 'Follow succesfull.',
+                'followid' => $newfollowid
             ],200);
         } catch (\Exception $e) {
             dd($e);
@@ -45,14 +57,30 @@ class FollowController extends Controller
             $followid = $request->route('followid');
             $following = Auth::user()->userid;
 
-            $follow = Follow::where([
+            $unfollow = Follow::where([
                 'following' => $following,
                 'followid' => $followid
             ])->delete();
 
+            if(!$unfollow){
+                return response()->json([
+                    'status' => false,
+                    'messege' => 'Unfollow failed.'
+                ]);
+            }
+
+            $followed = Follow::select('followed')
+            ->where('followid', $followid)
+            ->get();
+
+            $decrementfollowers = User::where('userid', $followed)
+            ->decrement('followers');
+            $decrementfollowings = User::where('userid', $following)
+            ->decrement('followers');
+
             return response()->json([
-                "status" => true,
-                "messege" => "unfollow successfully"
+                'status' => true,
+                'messege' => 'Unfollow successfull.'
             ],200);
         } catch (\Exception $e) {
             dd($e);
@@ -75,9 +103,9 @@ class FollowController extends Controller
             ->get();
 
             return response()->json([
-                "status" => true,
-                "messege" => "get following successfully",
-                "following" => $followingdetails
+                'status' => true,
+                'messege' => 'Get following successfull.',
+                'following' => $followingdetails
             ], 200);
         } catch (\Exception $e) {
             dd($e);
@@ -100,9 +128,9 @@ class FollowController extends Controller
             ->get();
 
             return response()->json([
-                "status" => true,
-                "messege" => "get followers successfully",
-                "followers" => $followerdetails
+                'status' => true,
+                'messege' => 'Get followers successfull.',
+                'followers' => $followerdetails
             ], 200);
         } catch (\Exception $e) {
             dd($e);

@@ -17,15 +17,16 @@ class UserController extends Controller
 {
     public function getAllUsers(Request $request){
         try{
-            $allusers = User::select('userid', 'username', 'profilepicture')
+            $allusers = User::select('userid', 'username', 'profilepicture', 'followers')
             ->get();
 
             return response()->json([
-                "status" => true,
-                "message" => "Get all users success",
-                "allusers" => $allusers
+                'status' => true,
+                'message' => 'Get all users successfull.',
+                'allusers' => $allusers
             ], 200);
         } catch (\Exception $e) {
+            dd($e);
             return response()->json([
                 'status' => false,
                 'message' => 'Internal server error.'
@@ -36,15 +37,16 @@ class UserController extends Controller
         try{
             $userid = $request->route('userid');
             $user = User::where('userid', $userid)
-            ->select('userid', 'username', 'email', 'profilepicture', 'bio')
+            ->select('userid', 'username', 'email', 'profilepicture', 'bio', 'followers')
             ->get();
 
             return response()->json([
-                "status" => true,
-                "message" => "Get user success",
-                "user" => $user
+                'status' => true,
+                'message' => 'Get user successfull.',
+                'user' => $user
             ], 200);
         } catch (\Exception $e) {
+            dd($e);
             return response()->json([
                 'status' => false,
                 'message' => 'Internal server error.'
@@ -71,20 +73,30 @@ class UserController extends Controller
             $matchpassword = Hash::check($prevpassword, Auth::user()->password);
 
             if (!$matchpassword) {
-                return response()->json(['message' => 'Password not match'], 400);
-            } else {
-                User::where('userid', $userid)->update([
-                    'username' => $username,
-                    'email' => $email,
-                    'password' => Hash::make($password),
-                    'profilepicture' => $profilepicture,
-                    'bio' => $bio
-                ]);
-                return response()->json(['message' => 'Update user success'], 200);
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Password not match'
+                ], 400);
             }
+
+            $updateuser = User::where('userid', $userid)->update([
+                'username' => $username,
+                'email' => $email,
+                'password' => Hash::make($password),
+                'profilepicture' => $profilepicture,
+                'bio' => $bio
+            ]);
+            return response()->json([
+                'status' => true,
+                'message' => 'Update user success'
+            ], 200);
         } catch (ValidationException $e) {
-            return response()->json(['message' => $e->errors()], 422);
+            return response()->json([
+                'status' => false,
+                'message' => $e->errors()
+            ], 422);
         } catch (\Exception $e) {
+            dd($e);
             return response()->json([
                 'status' => false,
                 'message' => 'Internal server error.'
@@ -100,11 +112,12 @@ class UserController extends Controller
             ->get();
 
             return response()->json([
-                "status" => true,
-                "message" => "Search users success",
-                "users" => $users
+                'status' => true,
+                'message' => 'Search users successfull.',
+                'users' => $users
             ]);
         } catch (\Exception $e) {
+            dd($e);
             return response()->json([
                 'status' => false,
                 'message' => 'Internal server error.'
