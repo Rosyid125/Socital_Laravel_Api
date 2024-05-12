@@ -10,14 +10,14 @@ class Follow extends Model
 {
     use HasFactory;
 
-    protected $primaryKey = "followid";
+    protected $primaryKey = 'followid';
     public function following(): BelongsTo
     {
-        return $this->belongsTo(User::class, "following", "userid");
+        return $this->belongsTo(User::class, 'following', 'userid');
     }
     
     public function followed(): BelongsTo
     {
-        return $this->belongsTo(User::class, "followed", "userid");
+        return $this->belongsTo(User::class, 'followed', 'userid');
     }
 }

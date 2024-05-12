@@ -8,6 +8,7 @@ use App\Http\Controllers\LikeController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\FollowController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Middleware\Authenticate;
 /*
 |--------------------------------------------------------------------------
@@ -51,6 +52,8 @@ Route::prefix('/follows/{userid}')->group(function(){
     Route::get('/followers', [FollowController::class, 'getFollowers']);
     Route::get('/followings', [FollowController::class, 'getFollowing']);
 });
+//notifications
+Route::get('/notifications/{userid}', [FollowController::class, 'getNotifications']);
 
 //protected routes
 Route::middleware('auth:sanctum')->group(function(){
@@ -82,4 +85,6 @@ Route::middleware('auth:sanctum')->group(function(){
         Route::post('/{userid}', [FollowController::class, 'follow']);
         Route::delete('/{followid}', [FollowController::class, 'unfollow']);
     });
+    //notifications
+    Route::patch('/notifications/{notificationid}', [NotificationController::class, 'markAsRead']);
 });

@@ -10,11 +10,11 @@ class Comment extends Model
 {
     use HasFactory;
 
-    protected $primaryKey = "commentid";
+    protected $primaryKey = 'commentid';
 
     public function user(): BelongsTo
     {
-        return $this->belongsTo(User::class, "userid", "userid");
+        return $this->belongsTo(User::class, 'userid', 'userid');
     }
 
     protected $fillable = ['userid', 'postid', 'datetime', 'comment'];

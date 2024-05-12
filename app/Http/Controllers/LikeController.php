@@ -12,6 +12,7 @@ use Illuminate\Support\Str;
 
 use App\Models\Like;
 use App\Models\Post;
+use App\Models\Notification;
 
 
 class LikeController extends Controller
@@ -45,9 +46,23 @@ class LikeController extends Controller
                 ], 400);
             }
 
+            // Increment likes from table posts.
             $incrementlikes = Post::where('postid', $postid)
-            ->where('userid', $userid)
             ->increment('likes');
+
+            // Add new notification row to table notifications.
+            $postmaker = Post::where('postid', $postid)
+            ->select('userid')
+            ->get();
+
+            $notification = Notification::create([
+                'userid' => $postmaker,
+                'trigerrerid' => $userid,
+                'notification' => 'liked your post',
+                'datetime' => date('Y-m-d H:i:s'),
+                'status' => 'unread',
+            ]);
+            // Add new notification row to table notifications.
 
             $newlikeid = $like -> likeid;
 
@@ -83,8 +98,8 @@ class LikeController extends Controller
                 ], 400);
             } 
 
+            // Decrement likes from table posts.
             $decrementlikes = Post::where('postid', $postid)
-            ->where('userid', $userid)
             ->decrement('likes');
 
             return response()->json([

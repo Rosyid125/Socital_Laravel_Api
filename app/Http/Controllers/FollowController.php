@@ -12,6 +12,7 @@ use Illuminate\Support\Str;
 
 use App\Models\Follow;
 use App\Models\User;
+use App\Models\Notification;
 
 class FollowController extends Controller
 {
@@ -34,10 +35,20 @@ class FollowController extends Controller
 
             $newfollowid = $follow->followid;
 
+            // Increment followers and followings from table users.
             $incrementfollowers = User::where('userid', $followed)
             ->increment('followers');
             $incrementfollowings = User::where('userid', $following)
             ->increment('following');
+
+            // Add new notification row to table notifications.
+            $notification = Notification::create([
+                'userid' => $followed,
+                'trigerrerid' => $following,
+                'notification' => 'followed you',
+                'datetime' => date('Y-m-d H:i:s'),
+                'status' => 'unread',
+            ]);
 
             return response()->json([
                 'status' => true,

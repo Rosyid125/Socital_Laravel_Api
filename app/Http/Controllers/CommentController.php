@@ -12,6 +12,7 @@ use Illuminate\Support\Str;
 
 use App\Models\Comment;
 use App\Models\Post;
+use App\Models\Notification;
 
 class CommentController extends Controller
 {
@@ -42,9 +43,23 @@ class CommentController extends Controller
                 ], 400);
             }
 
+            // Increment comments from table posts.
             $incrementcomments = Post::where('postid', $postid)
-            ->where('userid', $userid)
             ->increment('comments');
+
+            // Add new notification row to table notifications.
+            $postmaker = Post::where('postid', $postid)
+            ->select('userid')
+            ->get();
+
+            $notification = Notification::create([
+                'userid' => $postmaker,
+                'trigerrerid' => $userid,
+                'notification' => 'commented on your post \'{$comment}\'.',
+                'datetime' => date('Y-m-d H:i:s'),
+                'status' => 'unread',
+            ]);
+            // Add new notification row to table notifications.
 
             $newcommentid = $createcomment->commentid;
 
@@ -86,8 +101,8 @@ class CommentController extends Controller
                 ], 400);
             }
 
+            // Decrement comments from table posts.
             $decrementcomments = Post::where('postid', $postid)
-            ->where('userid', $userid)
             ->decrement('comments');
 
             return response()->json([

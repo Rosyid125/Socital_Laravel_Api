@@ -13,10 +13,10 @@ class User extends Authenticatable //nah ini contoh klo nama class singlular den
 {
     use HasFactory, HasApiTokens, Notifiable; //AuthenticatableTrait;
 
-    protected $primaryKey = "userid";
+    protected $primaryKey = 'userid';
 
     protected $fillable = [
-        'email', 'password', 'username', 'profilepicture', 'bio'
+        'email', 'password', 'username', 'profilepicture', 'bio', 'followers', 'followings'
         //Tambahkan atribut lainnya yang ingin Anda izinkan untuk dimasukkan secara massal
     ];
 
@@ -24,13 +24,20 @@ class User extends Authenticatable //nah ini contoh klo nama class singlular den
     {
         return $this->hasMany(Post::class, 'userid');
     }
+    public function like(): HasMany
+    {
+        return $this->hasMany(Like::class, 'userid');
+    }
+    public function comment(): HasMany
+    {
+        return $this->hasMany(Comment::class, 'userid');
+    }
     public function follow(): HasMany
     {
         return $this->hasMany(Follow::class, 'userid');
     }
-
-    public function like(): HasMany
+    public function notification(): HasMany
     {
-        return $this->hasMany(Like::class, 'userid');
+        return $this->hasMany(Notification::class, 'userid');
     }
 }
