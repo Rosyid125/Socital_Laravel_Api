@@ -31,7 +31,7 @@ class PostController extends Controller
                 $query->whereIn('userid', $followed)
                       ->orWhere('userid', $userid);
             })
-            ->select('postid', 'userid', 'datetime', 'post', 'postpic', 'likes', 'comments')
+            ->select('postid', 'userid', 'datetime', 'content', 'postpicture', 'likes', 'comments')
             ->get();
 
             return response()->json([
@@ -54,7 +54,7 @@ class PostController extends Controller
             $userid = $request->route('userid');
 
             $posts = Post::where('userid', $userid)
-            ->select('postid', 'userid', 'datetime', 'post', 'postpic', 'likes', 'comments')
+            ->select('postid', 'userid', 'datetime', 'content', 'postpicture', 'likes', 'comments')
             ->get();
 
             return response()->json([
@@ -74,10 +74,10 @@ class PostController extends Controller
     {
         try {
             $userid = Auth::user()->userid;
-            $post = $request->input('post');
-            $postpic = $request->input('postpic');
+            $content = $request->input('content');
+            $postpicture = $request->input('postpicture');
 
-            if (!$post && !$postpic) {
+            if (!$content && !$postpicture) {
                 return response()->json([
                     'status' => false,
                     'messsage' => 'Post and/or Post Picture can\'t be empty.'], 400);
@@ -86,8 +86,8 @@ class PostController extends Controller
             $create = Post::create([
                 'userid' => $userid,
                 'datetime' => date('Y-m-d H:i:s'),
-                'post' => $post,
-                'postpic'=> $postpic,
+                'content' => $content,
+                'postpicture'=> $postpicture,
                 'likes' => 0,
                 'comments' => 0
             ]);
@@ -123,7 +123,7 @@ class PostController extends Controller
                 $query->select('userid','username', 'profilepicture');
             }])
             ->where('postid', $postid)
-            ->select('postid', 'userid', 'datetime', 'post', 'postpic', 'likes', 'comments')
+            ->select('postid', 'userid', 'datetime', 'content', 'postpicture', 'likes', 'comments')
             ->get();
 
             return response()->json([
@@ -144,10 +144,10 @@ class PostController extends Controller
         try {
             $postid = $request->route('postid');
             $userid = Auth::user()->userid;
-            $post = $request->input('post');
-            $postpic = $request->input('postpic');
+            $content = $request->input('content');
+            $postpicture = $request->input('postpicture');
 
-            if (!$post && !$postpic) {
+            if (!$content && !$postpicture) {
                 return response()->json([
                     'status' => false,
                     'messsage' => 'Post and/or Post Picture can\'t be empty.'], 400);
@@ -157,8 +157,8 @@ class PostController extends Controller
             ->where('userid', $userid)
             ->update([
                 'datetime' => date('Y-m-d H:i:s'),
-                'post' => $post,
-                'postpic' => $postpic,
+                'content' => $content,
+                'postpicture' => $postpicture,
             ]);
 
             if (!$update) {
