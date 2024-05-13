@@ -20,10 +20,12 @@ class PostController extends Controller
         try {
             $userid = $request->route('userid');
             
+            // Get followed ids.
             $followed = Follow::select('followed')
             ->where('following', $userid)
             ->get();
 
+            // Get all posts including user and the other users that are labeled as "followings".
             $posts = Post::with(['user' => function ($query) {
                 $query->select('userid','username', 'profilepicture');
             }])
@@ -32,6 +34,7 @@ class PostController extends Controller
                       ->orWhere('userid', $userid);
             })
             ->select('postid', 'userid', 'datetime', 'content', 'postpicture', 'likes', 'comments')
+            ->orderBy('datetime', 'desc')
             ->get();
 
             return response()->json([
@@ -55,6 +58,7 @@ class PostController extends Controller
 
             $posts = Post::where('userid', $userid)
             ->select('postid', 'userid', 'datetime', 'content', 'postpicture', 'likes', 'comments')
+            ->orderBy('datetime', 'desc')
             ->get();
 
             return response()->json([
@@ -77,6 +81,7 @@ class PostController extends Controller
             $content = $request->input('content');
             $postpicture = $request->input('postpicture');
 
+            // Checking if content and postpicture are empty.
             if (!$content && !$postpicture) {
                 return response()->json([
                     'status' => false,
@@ -93,13 +98,6 @@ class PostController extends Controller
             ]);
 
             $newpostid = $create->postid;
-
-            if (!$create) {
-                return response()->json([
-                    'status' => false,
-                    'messsage' => 'Can\'t create post.'
-                ], 400);
-            }
 
             return response()->json([
                 'status' => true,
@@ -147,6 +145,7 @@ class PostController extends Controller
             $content = $request->input('content');
             $postpicture = $request->input('postpicture');
 
+            // Checking if content and postpicture are empty.
             if (!$content && !$postpicture) {
                 return response()->json([
                     'status' => false,
@@ -160,12 +159,6 @@ class PostController extends Controller
                 'content' => $content,
                 'postpicture' => $postpicture,
             ]);
-
-            if (!$update) {
-                return response()->json([
-                    'status' => false,
-                    'messsage' => 'Post is not existed or this is not your post.'], 400);
-            }
 
             return response()->json([
                 'status' => true,
@@ -189,12 +182,6 @@ class PostController extends Controller
                 'postid' => $postid,
                 'userid' => $userid
             ])->delete();
-
-            if(!$delete){
-                return response()->json([
-                    'status' => false,
-                    'messsage' => 'Post is not existed or this is not your post.'], 400);
-            }
 
             return response()->json([
                 'status' => true,

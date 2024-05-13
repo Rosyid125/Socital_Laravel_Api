@@ -35,30 +35,24 @@ class CommentController extends Controller
                 'comment' => $comment
             ]);
 
-
-            if(!$createcomment){
-                return response()->json([
-                    'status' => false,
-                    'message' => 'Failed to add comment.'
-                ], 400);
-            }
-
             // Increment comments from table posts.
             $incrementcomments = Post::where('postid', $postid)
             ->increment('comments');
 
             // Add new notification row to table notifications.
             $postmaker = Post::where('postid', $postid)
-            ->select('userid')
-            ->get();
-
-            $notification = Notification::create([
-                'userid' => $postmaker,
-                'trigerrerid' => $userid,
-                'notification' => 'commented on your post \'{$comment}\'.',
-                'datetime' => date('Y-m-d H:i:s'),
-                'status' => 'unread',
-            ]);
+            ->value('userid');
+            
+            // If user comments on own post then wont make any notification.
+            if($postmaker != $userid){
+                $notification = Notification::create([
+                    'userid' => $postmaker,
+                    'trigerrerid' => $userid,
+                    'notification' => 'commented on your post \'{$comment}\'.',
+                    'datetime' => date('Y-m-d H:i:s'),
+                    'status' => 'unread',
+                ]);
+            }
             // Add new notification row to table notifications.
 
             $newcommentid = $createcomment->commentid;
@@ -94,16 +88,16 @@ class CommentController extends Controller
             ])
             ->delete();
 
-            if(!$deletecomment){
-                return response()->json([
-                    'status' => false,
-                    'message' => 'Failed to delete comment.'
-                ], 400);
-            }
-
             // Decrement comments from table posts.
-            $decrementcomments = Post::where('postid', $postid)
-            ->decrement('comments');
+            // Checking if theres no comments on the post.
+            $comments = Post::where('postid', $postid)
+            ->value('comments');
+
+            if($comments > 0){
+                $decrementcomments = Post::where('postid', $postid)
+                ->decrement('comments');
+            }
+            // Decrement comments from table posts.
 
             return response()->json([
                 'status' => true,
@@ -126,6 +120,7 @@ class CommentController extends Controller
             }])
             ->where('postid', $postid)
             ->select('commentid', 'userid', 'datetime', 'comment')
+            ->orderBy('datetime', 'desc')
             ->get();
 
             return response()->json([

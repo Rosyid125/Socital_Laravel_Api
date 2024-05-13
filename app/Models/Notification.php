@@ -15,5 +15,8 @@ class Notification extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'userid', 'userid');
+
     }
+
+    protected $fillable = ['userid', 'trigerrerid', 'notification', 'datetime', 'status'];
 }

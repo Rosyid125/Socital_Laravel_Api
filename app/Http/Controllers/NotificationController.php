@@ -18,7 +18,7 @@ class NotificationController extends Controller
     public function getNotifications(Request $request){
         try{
             $userid = $request->route('userid');
-        
+            
             $notifications = Notification::where('userid', $userid)
             ->with(['user' => function ($query) {
                 $query->select('userid','username', 'profilepicture');

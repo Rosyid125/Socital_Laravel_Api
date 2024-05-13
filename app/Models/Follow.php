@@ -20,4 +20,6 @@ class Follow extends Model
     {
         return $this->belongsTo(User::class, 'followed', 'userid');
     }
+
+    protected $fillable = ['following', 'followed'];
 }

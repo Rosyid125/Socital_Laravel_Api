@@ -17,7 +17,7 @@ class UserController extends Controller
 {
     public function getAllUsers(Request $request){
         try{
-            $allusers = User::select('userid', 'username', 'profilepicture', 'followers')
+            $allusers = User::select('userid', 'username', 'profilepicture', 'followers', 'followings')
             ->get();
 
             return response()->json([
@@ -37,7 +37,7 @@ class UserController extends Controller
         try{
             $userid = $request->route('userid');
             $user = User::where('userid', $userid)
-            ->select('userid', 'username', 'email', 'profilepicture', 'bio', 'followers')
+            ->select('userid', 'username', 'email', 'profilepicture', 'bio', 'followers', 'followings')
             ->get();
 
             return response()->json([
@@ -70,14 +70,16 @@ class UserController extends Controller
             $profilepicture = $request->input('profilepicture');
             $bio = $request->input('bio');
 
+            // Check if password not match.
             $matchpassword = Hash::check($prevpassword, Auth::user()->password);
-
+            
             if (!$matchpassword) {
                 return response()->json([
                     'status' => false,
                     'message' => 'Password not match'
                 ], 400);
             }
+            // Check if password not match.
 
             $updateuser = User::where('userid', $userid)->update([
                 'username' => $username,

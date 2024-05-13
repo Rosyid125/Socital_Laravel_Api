@@ -31,7 +31,7 @@ Route::post('/auth/register', [AuthController::class, 'register']);
 //users
 Route::prefix('/users')->group(function(){
     Route::get('/', [userController::class, 'getAllUsers']);
-    Route::get('/search', [userController::class, 'searchUser']);
+    Route::get('/search', [userController::class, 'searchUsers']);
     Route::prefix('/{userid}')->group(function(){
         Route::get('/', [userController::class, 'userDetails']);
         //users: posts
@@ -53,7 +53,7 @@ Route::prefix('/follows/{userid}')->group(function(){
     Route::get('/followings', [FollowController::class, 'getFollowing']);
 });
 //notifications
-Route::get('/notifications/{userid}', [FollowController::class, 'getNotifications']);
+Route::get('/notifications/{userid}', [NotificationController::class, 'getNotifications']);
 
 //protected routes
 Route::middleware('auth:sanctum')->group(function(){
@@ -61,7 +61,7 @@ Route::middleware('auth:sanctum')->group(function(){
     Route::delete('/auth/logout', [AuthController::class, 'logout']);
     Route::get('/auth/me', [AuthController::class, 'me']);
     //users
-    Route::patch('/users/{userid}', [userController::class, 'editUser']);
+    Route::patch('/users/edit', [userController::class, 'editUser']);
     //posts
     Route::prefix('/posts')->group(function(){
         Route::post('/create', [PostController::class, 'createPost']);

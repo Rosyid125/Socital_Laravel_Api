@@ -23,28 +23,23 @@ class LikeController extends Controller
             $postid = $request->route('postid');
             $userid = Auth::user()->userid;
 
-            $alreadyliked = Like::where(['userid' => $userid,
+            // Checking if user already liked the post.
+            $already = Like::where(['userid' => $userid,
             'postid' => $postid])
             ->first();
             
-            if($alreadyliked){
+            if($already){
                 return response()->json([
                     'status' => false,
                     'messege' => 'You already liked this post.'
                 ], 400);
             }
+            // Checking if user already liked the post.
 
             $like = Like::create([
                 'userid' => $userid,
                 'postid' => $postid
             ]);
-
-            if(!$like){
-                return response()->json([
-                    'status' => false,
-                    'message' => 'Post is not existed.'
-                ], 400);
-            }
 
             // Increment likes from table posts.
             $incrementlikes = Post::where('postid', $postid)
@@ -52,16 +47,18 @@ class LikeController extends Controller
 
             // Add new notification row to table notifications.
             $postmaker = Post::where('postid', $postid)
-            ->select('userid')
-            ->get();
+            ->value('userid');
 
-            $notification = Notification::create([
-                'userid' => $postmaker,
-                'trigerrerid' => $userid,
-                'notification' => 'liked your post',
-                'datetime' => date('Y-m-d H:i:s'),
-                'status' => 'unread',
-            ]);
+            // If user likes on own post then wont make any notification.
+            if($postmaker != $userid){
+                $notification = Notification::create([
+                    'userid' => $postmaker,
+                    'trigerrerid' => $userid,
+                    'notification' => 'liked your post',
+                    'datetime' => date('Y-m-d H:i:s'),
+                    'status' => 'unread',
+                ]);
+         }
             // Add new notification row to table notifications.
 
             $newlikeid = $like -> likeid;
@@ -91,16 +88,16 @@ class LikeController extends Controller
                 'likeid' => $likeid
             ])->delete();
 
-            if(!$dislike){
-                return response()->json([
-                    'status' => false,
-                    'message' => 'Post is not existed or you have\'nt liked this post.'
-                ], 400);
-            } 
-
             // Decrement likes from table posts.
-            $decrementlikes = Post::where('postid', $postid)
-            ->decrement('likes');
+            // Checking if theres no likes on the post.
+            $zerolikes = Post::where('postid', $postid)
+            ->value('likes');
+            
+            if($zerolikes > 0){
+                $decrementlikes = Post::where('postid', $postid)
+                ->decrement('likes');
+            }
+            // Decrement likes from table posts.
 
             return response()->json([
                 'status' => true,
