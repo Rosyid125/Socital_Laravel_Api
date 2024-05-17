@@ -38,11 +38,20 @@ class AuthController extends Controller
                 'username' => 'required',
                 'email' => 'required|email|',
                 'password' => 'required',
+                'confpassword' => 'required',
             ]);
             
             $username = $validatedData['username'];
             $email = $validatedData['email'];
             $password = $validatedData['password'];
+            $confpassword = $validatedData['confpassword'];
+
+            if($password != $confpassword) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Password not match'
+                ], 400);
+            }
 
             $user = User::where('email', $email)
             ->first();
