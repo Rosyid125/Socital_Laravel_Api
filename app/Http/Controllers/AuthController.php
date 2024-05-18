@@ -38,7 +38,7 @@ class AuthController extends Controller
                 'username' => 'required',
                 'email' => 'required|email|',
                 'password' => 'required',
-                'confpassword' => 'required',
+                'confpassword' => 'required'
             ]);
             
             $username = $validatedData['username'];
@@ -126,6 +126,12 @@ class AuthController extends Controller
                 'status' => true,
                 'message' => 'Authentication successful.',
                 'userid' => $userid,
+                'username' => $user->username,
+                'email' => $user->email,
+                'profilepicture' => $user->profilepicture,
+                'bio' => $user->bio,
+                'followers' => $user->followers,
+                'followings' => $user->followings,
                 'token' => $token
             ], 200);
         } catch (ValidationException $e) {

@@ -17,7 +17,38 @@ use App\Models\Notification;
 
 class LikeController extends Controller
 {
+    public function userLikeStatus(Request $request){
+        try {
+            $userid = $request->route('userid');
+            $postid = $request->route('postid');
 
+            $like = Like::where([
+                'userid' => $userid,
+                'postid' => $postid
+            ])->first();
+
+            if($like){
+                return response()->json([
+                    'status' => true,
+                    'messege' => 'Post has been liked.',
+                    'liked' => true,
+                    'likeid' => $like->likeid
+                ], 200);
+            }else{
+                return response()->json([
+                    'status' => false,
+                    'messege' => 'Post has not been liked.',
+                    'liked' => false
+                ], 200);
+            }
+        } catch (\Exception $e) {
+            dd($e);
+            return response()->json([
+                'status' => false,
+                'message' => 'Internal server error.'
+            ], 500);
+        }
+    }
     public function likePost(Request $request){
         try {
             $postid = $request->route('postid');

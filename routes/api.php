@@ -43,6 +43,7 @@ Route::prefix('/users')->group(function(){
 Route::prefix('/posts/{postid}')->group(function(){
     Route::get('/', [PostController::class, 'postDetails']);
     //posts: likes
+    Route::get('/likes/{userid}', [LikeController::class, 'userLikeStatus']);
     Route::get('/likes', [LikeController::class, 'getLikes']);
     //posts: comments
     Route::get('/comments', [CommentController::class, 'getComments']);

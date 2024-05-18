@@ -39,7 +39,7 @@ class FollowController extends Controller
                 return response()->json([
                     'status' => false,
                     'messege' => 'Already followed.',
-                ]);
+                ], 400);
             }
             //Check if already followed
 
@@ -139,10 +139,15 @@ class FollowController extends Controller
             ->select('userid', 'username', 'profilepicture')
             ->get();
 
+            $followid = Follow::select('followid')
+            ->where('following', $userid)
+            ->get();
+
             return response()->json([
                 'status' => true,
                 'messege' => 'Get following successfull.',
-                'following' => $followingdetails
+                'following' => $followingdetails,
+                'followid' => $followid
             ], 200);
         } catch (\Exception $e) {
             dd($e);
