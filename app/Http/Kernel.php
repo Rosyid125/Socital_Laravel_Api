@@ -40,7 +40,7 @@ class Kernel extends HttpKernel
 
         'api' => [
             // \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class, //ini perlu di uncomment jika mau pake sanctum package lewat frontend SPA seperti react, tapi harus setup cors dulu
-            \Illuminate\Routing\Middleware\ThrottleRequests::class.':api',
+            // \Illuminate\Routing\Middleware\ThrottleRequests::class.':api', // supaya tidak too many attempt error karena di spam client hehe pendekatan yang buruk
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
         ],
     ];
