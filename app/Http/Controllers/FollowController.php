@@ -18,12 +18,12 @@ class FollowController extends Controller
 {
     public function userFollowStatus(Request $request){
         try {
-            $userid = $request->route('userid');
-            $followid = $request->route('followid');
+            $following = $request->route('following');
+            $followed = $request->route('followed');
 
             $follow = Follow::where([
-                'following' => $userid,
-                'followid' => $followid
+                'following' => $following,
+                'followed' => $followed
             ])->first();
 
             if($follow){
@@ -31,7 +31,6 @@ class FollowController extends Controller
                     'status' => true,
                     'messege' => 'You already followed this user.',
                     'followed' => true,
-                    'followid' => $follow->followid
                 ], 200);
             }else{
                 return response()->json([
@@ -116,6 +115,20 @@ class FollowController extends Controller
         try{
             $followid = $request->route('followid');
             $following = Auth::user()->userid;
+
+            // Check if follow dosent belong to the user.
+            $follow = Follow::where([
+                'following' => $following,
+                'followid' => $followid
+            ])->first();
+
+            if(!$follow){
+                return response()->json([
+                    'status' => false,
+                    'message' => 'You can only delete your follows.'
+                ], 422);
+            }
+            // Check if follow dosent belong to the user.
             
             $unfollow = Follow::where([
                 'following' => $following,
@@ -167,19 +180,17 @@ class FollowController extends Controller
             ->where('following', $userid)
             ->get();
 
-            $followingdetails = User::whereIn('userid', $following)
-            ->select('userid', 'username', 'profilepicture')
-            ->get();
-
-            $followid = Follow::select('followid')
-            ->where('following', $userid)
+            $followingdetails = Follow::with(['followed' => function ($query) {
+                $query->select('userid','username', 'profilepicture');
+            }])
+            ->whereIn('followed', $following)
+            ->select('followid', 'followed')
             ->get();
 
             return response()->json([
                 'status' => true,
                 'messege' => 'Get following successfull.',
-                'following' => $followingdetails,
-                'followid' => $followid
+                'following' => $followingdetails
             ], 200);
         } catch (\Exception $e) {
             dd($e);
@@ -198,8 +209,11 @@ class FollowController extends Controller
             ->where('followed', $userid)
             ->get();
 
-            $followerdetails = User::whereIn('userid', $followers)
-            ->select('userid', 'username', 'profilepicture')
+            $followerdetails = Follow::with(['following' => function ($query) {
+                $query->select('userid','username', 'profilepicture');
+            }])
+            ->whereIn('following', $followers)
+            ->select('followid', 'following')
             ->get();
 
             return response()->json([

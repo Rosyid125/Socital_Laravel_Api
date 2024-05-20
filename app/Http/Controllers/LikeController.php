@@ -113,6 +113,20 @@ class LikeController extends Controller
             $postid = $request->route('postid');
             $likeid = $request->route('likeid');
 
+            // Check if like dosent belong to the user.
+            $like = Like::where([
+                'userid' => $userid,
+                'likeid' => $likeid
+            ])->first();
+
+            if(!$like){
+                return response()->json([
+                    'status' => false,
+                    'message' => 'You can only delete your like.'
+                ], 422);
+            }
+            // Check if like dosent belong to the user.
+
             $dislike = Like::where([
                 'userid' => $userid,
                 'postid' => $postid,

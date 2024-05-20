@@ -182,6 +182,20 @@ class PostController extends Controller
             $postid = $request->route('postid');
             $userid = Auth::user()->userid;
 
+            // Check if post dosent belong to the user.
+            $post = Post::where([
+                'userid' => $userid,
+                'postid' => $postid
+            ])->first();
+
+            if(!$post){
+                return response()->json([
+                    'status' => false,
+                    'message' => 'You can only delete your posts.'
+                ], 422);
+            }
+            // Check if post dosent belong to the user.
+
             $delete = Post::where([
                 'postid' => $postid,
                 'userid' => $userid

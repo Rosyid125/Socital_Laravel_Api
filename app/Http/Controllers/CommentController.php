@@ -83,6 +83,20 @@ class CommentController extends Controller
             $userid = Auth::user()->userid;
             $commentid = $request->route('commentid');
 
+            // Check if comment dosent belong to the user.
+            $comment = Comment::where([
+                'userid' => $userid,
+                'commentid' => $commentid
+            ])->first();
+
+            if(!$comment){
+                return response()->json([
+                    'status' => false,
+                    'message' => 'You can only delete your comments.'
+                ], 422);
+            }
+            // Check if comment dosent belong to the user.
+
             $deletecomment = Comment::where([
                 'userid' => $userid,
                 'postid' => $postid,

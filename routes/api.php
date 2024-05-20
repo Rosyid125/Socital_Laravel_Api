@@ -49,8 +49,8 @@ Route::prefix('/posts/{postid}')->group(function(){
     Route::get('/comments', [CommentController::class, 'getComments']);
 });
  //follows
+Route::get('/follows/{followed}/following/{following}', [FollowController::class, 'userFollowStatus']);
 Route::prefix('/follows/{userid}')->group(function(){
-    Route::get('/{followid}', [FollowController::class, 'userFollowStatus']);
     Route::get('/followers', [FollowController::class, 'getFollowers']);
     Route::get('/followings', [FollowController::class, 'getFollowing']);
 });
