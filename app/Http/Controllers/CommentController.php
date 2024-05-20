@@ -13,6 +13,7 @@ use Illuminate\Support\Str;
 use App\Models\Comment;
 use App\Models\Post;
 use App\Models\Notification;
+use App\Models\User;
 
 class CommentController extends Controller
 {
@@ -47,10 +48,12 @@ class CommentController extends Controller
             
             // If user comments on own post then wont make any notification.
             if($postmaker != $userid){
+                $triggererusername = User::where('userid', $userid)->select('username')->first();
+
                 $notification = Notification::create([
                     'userid' => $postmaker,
                     'trigerrerid' => $userid,
-                    'notification' => 'commented on your post \'{$comment}\'.',
+                    'notification' => $triggererusername->username . ' commented on your post. \''. $comment . '\'',
                     'datetime' => date('Y-m-d H:i:s'),
                     'status' => 'unread',
                 ]);

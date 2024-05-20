@@ -13,6 +13,7 @@ use Illuminate\Support\Str;
 use App\Models\Like;
 use App\Models\Post;
 use App\Models\Notification;
+use App\Models\User;
 
 
 class LikeController extends Controller
@@ -82,10 +83,14 @@ class LikeController extends Controller
 
             // If user likes on own post then wont make any notification.
             if($postmaker != $userid){
+                $postcontent = Post::where('postid', $postid)->select('content')->first();
+
+                $triggererusername = User::where('userid', $userid)->select('username')->first();
+
                 $notification = Notification::create([
                     'userid' => $postmaker,
                     'trigerrerid' => $userid,
-                    'notification' => 'liked your post',
+                    'notification' => $triggererusername -> username .' liked your post \''. $postcontent->content .'\'',
                     'datetime' => date('Y-m-d H:i:s'),
                     'status' => 'unread',
                 ]);

@@ -23,7 +23,8 @@ class NotificationController extends Controller
             ->with(['user' => function ($query) {
                 $query->select('userid','username', 'profilepicture');
             }])
-            ->select('notificationid', 'userid', 'trigerrerid', 'notification', 'datetime', 'status')
+            ->select('notificationid', 'notification', 'datetime', 'status')
+            ->orderBy('notificationid', 'desc')
             ->get();
 
             return response()->json([

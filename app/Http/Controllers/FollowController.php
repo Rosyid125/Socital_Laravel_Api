@@ -90,13 +90,16 @@ class FollowController extends Controller
             $newfollowid = $follow->followid;
 
             // Add new notification row to table notifications.
+            $triggererusername = User::where('userid', $following)->select('username')->first();
+
             $notification = Notification::create([
                 'userid' => $followed,
                 'trigerrerid' => $following,
-                'notification' => 'followed you',
+                'notification' => $triggererusername->username .' followed you',
                 'datetime' => date('Y-m-d H:i:s'),
                 'status' => 'unread',
             ]);
+            // Add new notification row to table notifications.
 
             return response()->json([
                 'status' => true,
@@ -174,16 +177,11 @@ class FollowController extends Controller
     public function getFollowing(Request $request){
         try {
             $userid = $request->route('userid');
-            
-            // Get following ids
-            $following = Follow::select('followed')
-            ->where('following', $userid)
-            ->get();
 
             $followingdetails = Follow::with(['followed' => function ($query) {
                 $query->select('userid','username', 'profilepicture');
             }])
-            ->whereIn('followed', $following)
+            ->where('following', $userid)
             ->select('followid', 'followed')
             ->get();
 
@@ -203,16 +201,11 @@ class FollowController extends Controller
     public function getFollowers(Request $request){
         try {
             $userid = $request->route('userid');
-            
-            // Get follower ids
-            $followers = Follow::select('following')
-            ->where('followed', $userid)
-            ->get();
 
             $followerdetails = Follow::with(['following' => function ($query) {
                 $query->select('userid','username', 'profilepicture');
             }])
-            ->whereIn('following', $followers)
+            ->where('followed', $userid)
             ->select('followid', 'following')
             ->get();
 
