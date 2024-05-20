@@ -50,6 +50,7 @@ Route::prefix('/posts/{postid}')->group(function(){
 });
  //follows
 Route::prefix('/follows/{userid}')->group(function(){
+    Route::get('/{followid}', [FollowController::class, 'userFollowStatus']);
     Route::get('/followers', [FollowController::class, 'getFollowers']);
     Route::get('/followings', [FollowController::class, 'getFollowing']);
 });

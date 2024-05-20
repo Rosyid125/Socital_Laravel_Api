@@ -81,6 +81,8 @@ class PostController extends Controller
             $content = $request->input('content');
             $postpicture = $request->input('postpicture');
 
+            date_default_timezone_set('Asia/Jakarta');
+
             // Checking if content and postpicture are empty.
             if (!$content && !$postpicture) {
                 return response()->json([
@@ -144,6 +146,8 @@ class PostController extends Controller
             $userid = Auth::user()->userid;
             $content = $request->input('content');
             $postpicture = $request->input('postpicture');
+
+            date_default_timezone_set('Asia/Jakarta');
 
             // Checking if content and postpicture are empty.
             if (!$content && !$postpicture) {

@@ -16,6 +16,38 @@ use App\Models\Notification;
 
 class FollowController extends Controller
 {
+    public function userFollowStatus(Request $request){
+        try {
+            $userid = $request->route('userid');
+            $followid = $request->route('followid');
+
+            $follow = Follow::where([
+                'following' => $userid,
+                'followid' => $followid
+            ])->first();
+
+            if($follow){
+                return response()->json([
+                    'status' => true,
+                    'messege' => 'You already followed this user.',
+                    'followed' => true,
+                    'followid' => $follow->followid
+                ], 200);
+            }else{
+                return response()->json([
+                    'status' => false,
+                    'messege' => 'You don\'t follow this user.',
+                    'followed' => false
+                ], 200);
+            }
+        } catch (\Exception $e) {
+            dd($e);
+            return response()->json([
+                'status' => false,
+                'message' => 'Internal server error.'
+            ], 500);
+        }
+    }
     public function follow(Request $request){
         try{
             $followed = $request->route('userid');

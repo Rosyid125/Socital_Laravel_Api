@@ -23,6 +23,8 @@ class CommentController extends Controller
                 'comment'=> 'required'
             ]);
 
+            date_default_timezone_set('Asia/Jakarta');
+
             $postid = $request->route('postid');
             $datetime = date('Y-m-d H:i:s');
             $userid = Auth::user()->userid;
