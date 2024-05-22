@@ -56,7 +56,9 @@ class PostController extends Controller
         try {
             $userid = $request->route('userid');
 
-            $posts = Post::where('userid', $userid)
+            $posts = Post::with(['user' => function ($query) {
+                $query->select('userid','username', 'profilepicture');
+            }])->where('userid', $userid)
             ->select('postid', 'userid', 'datetime', 'content', 'postpicture', 'likes', 'comments')
             ->orderBy('datetime', 'desc')
             ->get();

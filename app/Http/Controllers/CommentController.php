@@ -38,9 +38,11 @@ class CommentController extends Controller
                 'comment' => $comment
             ]);
 
-            // Increment comments from table posts.
-            $incrementcomments = Post::where('postid', $postid)
-            ->increment('comments');
+            // update comments from table posts.
+            $countcomments = Comment::where('postid', $postid)->count();
+
+            $updatecomments = Post::where('postid', $postid)->update(['comments' => $countcomments]);
+            // update comments from table posts.
 
             // Add new notification row to table notifications.
             $postmaker = Post::where('postid', $postid)
@@ -107,16 +109,11 @@ class CommentController extends Controller
             ])
             ->delete();
 
-            // Decrement comments from table posts.
-            // Checking if theres no comments on the post.
-            $comments = Post::where('postid', $postid)
-            ->value('comments');
+            // update comments from table posts.
+            $countcomments = Comment::where('postid', $postid)->count();
 
-            if($comments > 0){
-                $decrementcomments = Post::where('postid', $postid)
-                ->decrement('comments');
-            }
-            // Decrement comments from table posts.
+            $updatecomments = Post::where('postid', $postid)->update(['comments' => $countcomments]);
+            // update comments from table posts.
 
             return response()->json([
                 'status' => true,

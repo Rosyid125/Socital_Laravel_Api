@@ -55,39 +55,66 @@ class UserController extends Controller
     }
     public function editUser(Request $request){
         try{
-            $validatedData = $request->validate([
-                'username' => 'required',
-                'email' => 'required|email|',
-                'prevpassword' => 'required',
-                'password' => 'required',
-            ]);
-
             $userid = Auth::user()->userid;
-            $username = $validatedData['username'];
-            $email = $validatedData['email'];
-            $prevpassword = $validatedData['prevpassword'];
-            $password = $validatedData['password'];
+            $username = $request->input('username');
+            $email = $request->input('email');
+            if($email){
+                $validatedData = $request->validate([
+                    'email' => 'email',
+                ]);
+                $email = $validatedData['email'];
+            }
+            $prevpassword = $request->input('prevpassword');
+            $newpassword = $request->input('newpassword');
             $profilepicture = $request->input('profilepicture');
             $bio = $request->input('bio');
 
-            // Check if password not match.
-            $matchpassword = Hash::check($prevpassword, Auth::user()->password);
-            
-            if (!$matchpassword) {
-                return response()->json([
-                    'status' => false,
-                    'message' => 'Password not match'
-                ], 400);
+            // Update Username
+            if ($username) {
+                User::where('userid', $userid)->update([
+                    'username' => $username,
+                ]);
             }
-            // Check if password not match.
+            if ($email) {
+                $user = User::where('email', $email)
+                ->first();
+    
+                if($user){
+                    return response()->json([
+                        'status' => false,
+                        'message' => 'Email is used.'
+                    ], 400);
+                }
 
-            $updateuser = User::where('userid', $userid)->update([
-                'username' => $username,
-                'email' => $email,
-                'password' => Hash::make($password),
-                'profilepicture' => $profilepicture,
-                'bio' => $bio
-            ]);
+                User::where('userid', $userid)->update([
+                    'email' => $email,
+                ]);
+            }
+            if ($prevpassword && $newpassword) {
+                // Check if password not match.
+                $matchpassword = Hash::check($prevpassword, Auth::user()->password);
+            
+                if (!$matchpassword) {
+                    return response()->json([
+                        'status' => false,
+                        'message' => 'Password not match'
+                    ], 400);
+                }
+                // Check if password not match.
+                User::where('userid', $userid)->update([
+                    'password' => Hash::make($newpassword),
+                ]);
+            }
+            if ($profilepicture) {
+                User::where('userid', $userid)->update([
+                    'profilepicture' => $profilepicture,
+                ]);
+            }
+            if ($bio) {
+                User::where('userid', $userid)->update([
+                    'bio' => $bio,
+                ]);
+            }
             return response()->json([
                 'status' => true,
                 'message' => 'Update user success'

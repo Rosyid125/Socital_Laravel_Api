@@ -30,12 +30,14 @@ class FollowController extends Controller
                 return response()->json([
                     'status' => true,
                     'messege' => 'You already followed this user.',
-                    'followed' => true,
+                    'followid' => $follow->followid,
+                    'followed' => true
                 ], 200);
             }else{
                 return response()->json([
                     'status' => false,
                     'messege' => 'You don\'t follow this user.',
+                    'followid' => null,
                     'followed' => false
                 ], 200);
             }
@@ -79,13 +81,19 @@ class FollowController extends Controller
                 'followed' => $followed
             ]);
 
-            // Increment followers and followings from table users.
-            $incrementfollowers = User::where('userid', $followed)
-            ->increment('followers');
+            // update followers and followings from table users.
+            $countfollowers = Follow::where('followed', $followed)->count();
 
-            $incrementfollowings = User::where('userid', $following)
-            ->increment('followings');
-            // Increment followers and followings from table users.
+            $updatefollowers = User::where('userid', $followed)->update([
+                'followers' => $countfollowers
+            ]);
+
+            $countfollowings = Follow::where('following', $following)->count();
+
+            $updatefollowings = User::where('userid', $following)->update([
+                'followings' => $countfollowings
+            ]);
+            // update followers and followings from table users.
 
             $newfollowid = $follow->followid;
 
@@ -137,30 +145,25 @@ class FollowController extends Controller
                 'following' => $following,
                 'followid' => $followid
             ])->delete();
+
             
             // Get followed id since in this function only has the followid and followingid.
             $followed = Follow::where('followid', $followid)
             ->value('followed');
 
-            // Decrement followers and followings from table users.
-            // Checking if there is no followers or followings.
-            $followers = User::where('userid', $followed)
-            ->value('followers');
+            // update followers and followings from table users.
+            $countfollowers = Follow::where('followed', $followed)->count();
 
-            if($followers > 0){
-                $decrementfollowers = User::where('userid', $followed)
-                ->decrement('followers');      
-            }
+            $updatefollowers = User::where('userid', $followed)->update([
+                'followers' => $countfollowers
+            ]);
 
-            // Checking if there is no followers or followings.
-            $followings = User::where('userid', $following)
-            ->value('followings');
+            $countfollowings = Follow::where('following', $following)->count();
 
-            if($followings > 0){
-                $decrementfollowings = User::where('userid', $following)
-                ->decrement('followings');
-            }
-            // Decrement followers and folowings from table users.
+            $updatefollowings = User::where('userid', $following)->update([
+                'followings' => $countfollowings
+            ]);
+            // update followers and followings from table users.
 
             return response()->json([
                 'status' => true,

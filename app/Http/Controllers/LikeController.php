@@ -73,9 +73,11 @@ class LikeController extends Controller
                 'postid' => $postid
             ]);
 
-            // Increment likes from table posts.
-            $incrementlikes = Post::where('postid', $postid)
-            ->increment('likes');
+            // update likes from table posts.
+            $countlikes = Like::where('postid', $postid)->count();
+
+            $updatelikes = Post::where('postid', $postid)->update(['likes' => $countlikes]);
+            // update likes from table posts.
 
             // Add new notification row to table notifications.
             $postmaker = Post::where('postid', $postid)
@@ -138,16 +140,11 @@ class LikeController extends Controller
                 'likeid' => $likeid
             ])->delete();
 
-            // Decrement likes from table posts.
-            // Checking if theres no likes on the post.
-            $zerolikes = Post::where('postid', $postid)
-            ->value('likes');
-            
-            if($zerolikes > 0){
-                $decrementlikes = Post::where('postid', $postid)
-                ->decrement('likes');
-            }
-            // Decrement likes from table posts.
+            // update likes from table posts.
+            $countlikes = Like::where('postid', $postid)->count();
+
+            $updatelikes = Post::where('postid', $postid)->update(['likes' => $countlikes]);
+            // update likes from table posts.
 
             return response()->json([
                 'status' => true,
