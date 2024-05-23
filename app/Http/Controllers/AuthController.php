@@ -117,21 +117,13 @@ class AuthController extends Controller
                 ], 401);
             }
 
-            $userid = Auth::id();
-
             // Its basically the same as "Auth::user()->createToken('AuthToken')->plainTextToken;" i just wanna try something different
             $token = auth('sanctum')->user()->createToken('AuthToken')->plainTextToken;
 
             return response()->json([
                 'status' => true,
                 'message' => 'Authentication successful.',
-                'userid' => $userid,
-                'username' => $user->username,
-                'email' => $user->email,
-                'profilepicture' => $user->profilepicture,
-                'bio' => $user->bio,
-                'followers' => $user->followers,
-                'followings' => $user->followings,
+                'userid' => $user->userid,
                 'token' => $token
             ], 200);
         } catch (ValidationException $e) {

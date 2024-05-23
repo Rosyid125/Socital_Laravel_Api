@@ -90,20 +90,26 @@ class UserController extends Controller
                     'email' => $email,
                 ]);
             }
-            if ($prevpassword && $newpassword) {
-                // Check if password not match.
-                $matchpassword = Hash::check($prevpassword, Auth::user()->password);
-            
-                if (!$matchpassword) {
-                    return response()->json([
-                        'status' => false,
-                        'message' => 'Password not match'
-                    ], 400);
+            if ($prevpassword || $newpassword) {
+                if ($prevpassword && $newpassword) {
+                    // Check if password not match.
+                    $matchpassword = Hash::check($prevpassword, Auth::user()->password);
+                
+                    if (!$matchpassword) {
+                        return response()->json([
+                            'status' => false,
+                            'message' => 'Previous password is not correct'
+                        ], 400);
+                    }
+                    // Check if password not match.
+                    User::where('userid', $userid)->update([
+                        'password' => Hash::make($newpassword),
+                    ]);
                 }
-                // Check if password not match.
-                User::where('userid', $userid)->update([
-                    'password' => Hash::make($newpassword),
-                ]);
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Both of password fields required.'
+                ], 400);
             }
             if ($profilepicture) {
                 User::where('userid', $userid)->update([
