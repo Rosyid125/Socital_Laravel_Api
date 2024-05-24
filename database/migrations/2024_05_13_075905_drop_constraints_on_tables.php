@@ -32,6 +32,7 @@ return new class extends Migration
         
         Schema::table('notifications', function (Blueprint $table) {
             $table->dropForeign(['userid']);
+            $table->dropForeign(['trigerrerid']);
         });
     }
 
@@ -40,7 +41,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        //
+        
         Schema::table('posts', function (Blueprint $table) {
             $table->foreign('userid')->references('userid')->on('users');
         });
@@ -62,6 +63,7 @@ return new class extends Migration
         
         Schema::table('notifications', function (Blueprint $table) {
             $table->foreign('userid')->references('userid')->on('users');
+            $table->foreign('trigerrerid')->references('userid')->on('users');
         });
     }
 };

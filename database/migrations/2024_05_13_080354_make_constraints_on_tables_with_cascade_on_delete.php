@@ -32,6 +32,7 @@ return new class extends Migration
         
         Schema::table('notifications', function (Blueprint $table) {
             $table->foreign('userid')->references('userid')->on('users')->onDelete('cascade')->onUpdate('cascade');
+            $table->foreign('trigerrerid')->references('userid')->on('users')->onDelete('cascade')->onUpdate('cascade');
         });
     }
 
