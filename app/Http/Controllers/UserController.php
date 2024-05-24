@@ -79,6 +79,10 @@ class UserController extends Controller
                         'message' => 'Email is used.'
                     ], 400);
                 }
+
+                $updateemail  = User::where('userid', $userid)->update([
+                    'email' => $email
+                ]);
             }
             if ($prevpassword || $newpassword) {
                 if ($prevpassword && $newpassword) {
@@ -90,6 +94,10 @@ class UserController extends Controller
                             'message' => 'Previous password is not correct'
                         ], 400);
                     }
+
+                    $updatepassword = User::where('userid', $userid)->update([
+                        'password' => Hash::make($newpassword)
+                    ]);
                 }
                 return response()->json([
                     'status' => false,
@@ -97,7 +105,7 @@ class UserController extends Controller
                 ], 400);
             }
 
-            $user  = User::where('userid', $userid)->update([
+            $updatetherest  = User::where('userid', $userid)->update([
                 'username' => $username,
                 'profilepicture' => $profilepicture,
                 'bio' => $bio,
