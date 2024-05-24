@@ -69,12 +69,6 @@ class UserController extends Controller
             $profilepicture = $request->input('profilepicture');
             $bio = $request->input('bio');
 
-            // Update Username
-            if ($username) {
-                User::where('userid', $userid)->update([
-                    'username' => $username,
-                ]);
-            }
             if ($email) {
                 $user = User::where('email', $email)
                 ->first();
@@ -110,6 +104,11 @@ class UserController extends Controller
                     'status' => false,
                     'message' => 'Both of password fields required.'
                 ], 400);
+            }
+            if ($username) {
+                User::where('userid', $userid)->update([
+                    'username' => $username,
+                ]);
             }
             if ($profilepicture) {
                 User::where('userid', $userid)->update([
