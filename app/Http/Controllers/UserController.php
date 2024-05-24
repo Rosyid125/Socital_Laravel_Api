@@ -137,10 +137,11 @@ class UserController extends Controller
     
     public function searchUsers(Request $request){
         try{
-            $search = $request->input('search');
+            $search = $request->route('search');
 
             $users = User::where('username', 'like', '%' . $search . '%')
-            ->select('userid', 'username', 'profilepicture')
+            ->select('userid', 'username', 'profilepicture', 'followers', 'followings')
+            ->orderBy('followers', 'desc')
             ->get();
 
             return response()->json([

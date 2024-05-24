@@ -31,7 +31,7 @@ Route::post('/auth/register', [AuthController::class, 'register']);
 //users
 Route::prefix('/users')->group(function(){
     Route::get('/', [userController::class, 'getAllUsers']);
-    Route::get('/search', [userController::class, 'searchUsers']);
+    Route::get('/search/{search}', [userController::class, 'searchUsers']);
     Route::prefix('/{userid}')->group(function(){
         Route::get('/', [userController::class, 'userDetails']);
         //users: posts
