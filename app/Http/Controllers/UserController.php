@@ -53,66 +53,65 @@ class UserController extends Controller
             ], 500);
         }
     }
-    public function editUser(Request $request){
-        try{
+    public function editUser(Request $request) {
+        try {
             $userid = Auth::user()->userid;
             $username = $request->input('username');
             $email = $request->input('email');
-            if($email){
-                $validatedData = $request->validate([
-                    'email' => 'email',
-                ]);
-                $email = $validatedData['email'];
-            }
             $prevpassword = $request->input('prevpassword');
             $newpassword = $request->input('newpassword');
             $profilepicture = $request->input('profilepicture');
             $bio = $request->input('bio');
-
-            if ($email) {
-                $user = User::where('email', $email)
-                ->first();
     
-                if($user){
+            // Validate email if it exists
+            if ($email) {
+                $validatedData = $request->validate([
+                    'email' => 'email',
+                ]);
+                $email = $validatedData['email'];
+    
+                // Check if the email is already in use
+                $user = User::where('email', $email)->first();
+                if ($user) {
                     return response()->json([
                         'status' => false,
                         'message' => 'Email is used.'
                     ], 400);
                 }
-
-                $updateemail  = User::where('userid', $userid)->update([
-                    'email' => $email
-                ]);
+    
+                // Update email
+                User::where('userid', $userid)->update(['email' => $email]);
             }
+    
+            // Update password if both fields are provided
             if ($prevpassword || $newpassword) {
                 if ($prevpassword && $newpassword) {
-                    $matchpassword = Hash::check($prevpassword, Auth::user()->password);
-                
-                    if (!$matchpassword) {
+                    if (!Hash::check($prevpassword, Auth::user()->password)) {
                         return response()->json([
                             'status' => false,
                             'message' => 'Previous password is not correct'
                         ], 400);
                     }
-
-                    $updatepassword = User::where('userid', $userid)->update([
-                        'password' => Hash::make($newpassword)
-                    ]);
+                    User::where('userid', $userid)->update(['password' => Hash::make($newpassword)]);
+                } else {
+                    return response()->json([
+                        'status' => false,
+                        'message' => 'Both password fields are required.'
+                    ], 400);
                 }
-                return response()->json([
-                    'status' => false,
-                    'message' => 'Both of password fields required.'
-                ], 400);
             }
-
-            $updatetherest  = User::where('userid', $userid)->update([
+    
+            // Update other fields
+            $updateData = array_filter([
                 'username' => $username,
                 'profilepicture' => $profilepicture,
-                'bio' => $bio,
-                'email' => $email,
-                'password' => Hash::make($newpassword),
-            ]);
-
+                'bio' => $bio
+            ], function($value) { return $value !== null; });
+    
+            if (!empty($updateData)) {
+                User::where('userid', $userid)->update($updateData);
+            }
+    
             return response()->json([
                 'status' => true,
                 'message' => 'Update user success'
@@ -123,13 +122,13 @@ class UserController extends Controller
                 'message' => $e->errors()
             ], 422);
         } catch (\Exception $e) {
-            dd($e);
             return response()->json([
                 'status' => false,
                 'message' => 'Internal server error.'
             ], 500);
         }
     }
+    
     public function searchUsers(Request $request){
         try{
             $search = $request->input('search');
