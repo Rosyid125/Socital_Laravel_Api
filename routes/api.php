@@ -68,7 +68,7 @@ Route::middleware('auth:sanctum')->group(function(){
     Route::prefix('/posts')->group(function(){
         Route::post('/create', [PostController::class, 'createPost']);
         Route::prefix('/{postid}')->group(function(){
-            Route::patch('/edit', [PostController::class, 'editPost']);
+            Route::post('/edit', [PostController::class, 'editPost']);
             Route::delete('/delete', [PostController::class, 'deletePost']);
             //posts: likes
             Route::prefix('/likes')->group(function(){

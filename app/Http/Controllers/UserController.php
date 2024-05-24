@@ -102,11 +102,10 @@ class UserController extends Controller
 
             // Code untuk menangani unggahan file
             $profilepicture = $request->file('profilepicture');
-            dd($profilepicture);
             if($profilepicture) {
                 $profilepicturename = time().'.'.$profilepicture->getClientOriginalExtension();
                 $profilepicture->storeAs('profilepictures', $profilepicturename, 'public');
-                User::where('userid', $userid)->update(['profilepicture' => $profilepicturename]);
+                User::where('userid', $userid)->update(['profilepicture' => 'http://localhost:8000/storage/profilepictures/' . $profilepicturename]);
             }
     
             // Update other fields

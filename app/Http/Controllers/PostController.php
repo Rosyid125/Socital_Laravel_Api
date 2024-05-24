@@ -81,7 +81,7 @@ class PostController extends Controller
         try {
             $userid = Auth::user()->userid;
             $content = $request->input('content');
-            $postpicture = $request->input('postpicture');
+            $postpicture = $request->file('postpicture');
 
             date_default_timezone_set('Asia/Jakarta');
 
@@ -96,12 +96,18 @@ class PostController extends Controller
                 'userid' => $userid,
                 'datetime' => date('Y-m-d H:i:s'),
                 'content' => $content,
-                'postpicture'=> $postpicture,
+                'postpicture' => null,
                 'likes' => 0,
                 'comments' => 0
             ]);
 
             $newpostid = $create->postid;
+
+            if($postpicture) {
+                $postpicturename = time().'.'.$postpicture->getClientOriginalExtension();
+                $postpicture->storeAs('postpictures', $postpicturename, 'public');
+                Post::where('postid', $newpostid)->update(['postpicture' => 'http://localhost:8000/storage/postpictures/' . $postpicturename]);
+            }
 
             return response()->json([
                 'status' => true,
@@ -147,7 +153,7 @@ class PostController extends Controller
             $postid = $request->route('postid');
             $userid = Auth::user()->userid;
             $content = $request->input('content');
-            $postpicture = $request->input('postpicture');
+            $postpicture = $request->file('postpicture');
 
             date_default_timezone_set('Asia/Jakarta');
 
@@ -157,14 +163,19 @@ class PostController extends Controller
                     'status' => false,
                     'messsage' => 'Post and/or Post Picture can\'t be empty.'], 400);
             }
-
+            
             $update = Post::where('postid', $postid)
             ->where('userid', $userid)
             ->update([
                 'datetime' => date('Y-m-d H:i:s'),
                 'content' => $content,
-                'postpicture' => $postpicture,
             ]);
+
+            if($postpicture) {
+                $postpicturename = time().'.'.$postpicture->getClientOriginalExtension();
+                $postpicture->storeAs('postpictures', $postpicturename, 'public');
+                Post::where('postid', $postid)->update(['postpicture' => 'http://localhost:8000/storage/postpictures/' . $postpicturename]);
+            }
 
             return response()->json([
                 'status' => true,
