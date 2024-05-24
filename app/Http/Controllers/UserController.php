@@ -60,7 +60,6 @@ class UserController extends Controller
             $email = $request->input('email');
             $prevpassword = $request->input('prevpassword');
             $newpassword = $request->input('newpassword');
-            $profilepicture = $request->input('profilepicture');
             $bio = $request->input('bio');
     
             // Validate email if it exists
@@ -100,11 +99,19 @@ class UserController extends Controller
                     ], 400);
                 }
             }
+
+            // Code untuk menangani unggahan file
+            $profilepicture = $request->file('profilepicture');
+            dd($profilepicture);
+            if($profilepicture) {
+                $profilepicturename = time().'.'.$profilepicture->getClientOriginalExtension();
+                $profilepicture->storeAs('profilepictures', $profilepicturename, 'public');
+                User::where('userid', $userid)->update(['profilepicture' => $profilepicturename]);
+            }
     
             // Update other fields
             $updateData = array_filter([
                 'username' => $username,
-                'profilepicture' => $profilepicture,
                 'bio' => $bio
             ], function($value) { return $value !== null; });
     

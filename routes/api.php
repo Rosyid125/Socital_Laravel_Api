@@ -63,7 +63,7 @@ Route::middleware('auth:sanctum')->group(function(){
     Route::delete('/auth/logout', [AuthController::class, 'logout']);
     Route::get('/auth/me', [AuthController::class, 'me']);
     //users
-    Route::patch('/users/edit', [userController::class, 'editUser']);
+    Route::post('/users/edit', [userController::class, 'editUser']);
     //posts
     Route::prefix('/posts')->group(function(){
         Route::post('/create', [PostController::class, 'createPost']);
