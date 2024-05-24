@@ -79,14 +79,9 @@ class UserController extends Controller
                         'message' => 'Email is used.'
                     ], 400);
                 }
-
-                User::where('userid', $userid)->update([
-                    'email' => $email,
-                ]);
             }
             if ($prevpassword || $newpassword) {
                 if ($prevpassword && $newpassword) {
-                    // Check if password not match.
                     $matchpassword = Hash::check($prevpassword, Auth::user()->password);
                 
                     if (!$matchpassword) {
@@ -95,31 +90,21 @@ class UserController extends Controller
                             'message' => 'Previous password is not correct'
                         ], 400);
                     }
-                    // Check if password not match.
-                    User::where('userid', $userid)->update([
-                        'password' => Hash::make($newpassword),
-                    ]);
                 }
                 return response()->json([
                     'status' => false,
                     'message' => 'Both of password fields required.'
                 ], 400);
             }
-            if ($username) {
-                User::where('userid', $userid)->update([
-                    'username' => $username,
-                ]);
-            }
-            if ($profilepicture) {
-                User::where('userid', $userid)->update([
-                    'profilepicture' => $profilepicture,
-                ]);
-            }
-            if ($bio) {
-                User::where('userid', $userid)->update([
-                    'bio' => $bio,
-                ]);
-            }
+
+            $user  = User::where('userid', $userid)->update([
+                'username' => $username,
+                'profilepicture' => $profilepicture,
+                'bio' => $bio,
+                'email' => $email,
+                'password' => Hash::make($newpassword),
+            ]);
+
             return response()->json([
                 'status' => true,
                 'message' => 'Update user success'
