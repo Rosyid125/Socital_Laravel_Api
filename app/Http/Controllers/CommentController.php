@@ -64,10 +64,19 @@ class CommentController extends Controller
 
             $newcommentid = $createcomment->commentid;
 
+            //also kebutuhan usestate react hehe
+            $comments = Comment::with(['user' => function ($query) {
+                $query->select('userid','username', 'profilepicture');
+            }])
+            ->where('postid', $postid)
+            ->select('commentid', 'userid', 'datetime', 'comment')
+            ->orderBy('datetime', 'desc')
+            ->get();
+
             return response()->json([
                 'status' => true,
                 'messege' => 'You commented on the post.',
-                'commentid' => $newcommentid
+                'comments' => $comments,
             ], 200);
         } catch (ValidationException $e) {
             return response()->json([
