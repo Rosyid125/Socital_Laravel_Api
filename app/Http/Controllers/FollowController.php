@@ -78,7 +78,7 @@ class FollowController extends Controller
 
             $follow = Follow::create([
                 'following' => $following,
-                'followed' => $followed
+                'followed' => $followed,
             ]);
 
             // update followers and followings from table users.
@@ -109,10 +109,18 @@ class FollowController extends Controller
             ]);
             // Add new notification row to table notifications.
 
+            // For react logic reason i got to add some query to get the (justfollowed) user details.
+            $followingdetails = Follow::with(['followed' => function ($query) {
+                $query->select('userid','username', 'profilepicture');
+            }])
+            ->where('following', $following)
+            ->select('followid', 'followed')
+            ->get();
+
             return response()->json([
                 'status' => true,
                 'messege' => 'Follow succesfull.',
-                'followid' => $newfollowid
+                'following' => $followingdetails
             ],200);
         } catch (\Exception $e) {
             dd($e);
