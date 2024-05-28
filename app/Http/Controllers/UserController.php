@@ -105,7 +105,7 @@ class UserController extends Controller
             if($profilepicture) {
                 $profilepicturename = time().'.'.$profilepicture->getClientOriginalExtension();
                 $profilepicture->storeAs('profilepictures', $profilepicturename, 'public');
-                User::where('userid', $userid)->update(['profilepicture' => 'http://localhost:8000/storage/profilepictures/' . $profilepicturename]);
+                User::where('userid', $userid)->update(['profilepicture' => 'http://174.129.75.28/storage/profilepictures/' . $profilepicturename]);
             }
     
             // Update other fields

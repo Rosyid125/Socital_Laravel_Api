@@ -106,7 +106,7 @@ class PostController extends Controller
             if($postpicture) {
                 $postpicturename = time().'.'.$postpicture->getClientOriginalExtension();
                 $postpicture->storeAs('postpictures', $postpicturename, 'public');
-                Post::where('postid', $newpostid)->update(['postpicture' => 'http://localhost:8000/storage/postpictures/' . $postpicturename]);
+                Post::where('postid', $newpostid)->update(['postpicture' => 'http://174.129.75.28/storage/postpictures/' . $postpicturename]);
             }
 
             return response()->json([
@@ -174,7 +174,7 @@ class PostController extends Controller
             if($postpicture) {
                 $postpicturename = time().'.'.$postpicture->getClientOriginalExtension();
                 $postpicture->storeAs('postpictures', $postpicturename, 'public');
-                Post::where('postid', $postid)->update(['postpicture' => 'http://localhost:8000/storage/postpictures/' . $postpicturename]);
+                Post::where('postid', $postid)->update(['postpicture' => 'http://174.129.75.28/storage/postpictures/' . $postpicturename]);
             }
 
             return response()->json([
